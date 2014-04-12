@@ -21,7 +21,7 @@ SKIPINIT=0
 TABBED=0
 
 # Set OSDATA to 1 to collect OS data using vmstat and iostat
-OSDATA=1
+OSDATA=0
 
 # Test/result database connection
 TESTHOST=localhost

@@ -46,6 +46,8 @@ for SCALE in $SCALES; do
   #
   for (( t=1; t<=$SETTIMES; t++ )); do
     for c in $SETCLIENTS; do
+      $TESTPSQL -c "select pg_stat_reset_single_table_counters(relid) from pg_stat_user_tables"
+      $TESTPSQL -c "select pg_stat_reset_single_table_counters(relid) from pg_stat_user_indexes"
       if [ -z "$SETRATES" ] ; then
         echo Run set \#$t of $SETTIMES with $c clients scale=$SCALE
         ./benchwarmer $c
@@ -55,6 +57,7 @@ for SCALE in $SCALES; do
           ./benchwarmer $c $r
         done 
       fi
+      $TESTPSQL -c "select 'Set: $t, scale: $SCALE, clients: $c' as about, * from pg_statio_user_tables order by relname" >> cache
       echo
     done
   done
