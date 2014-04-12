@@ -47,7 +47,7 @@ for SCALE in $SCALES; do
   for (( t=1; t<=$SETTIMES; t++ )); do
     for c in $SETCLIENTS; do
       $TESTPSQL -c "select pg_stat_reset_single_table_counters(relid) from pg_stat_user_tables"
-      $TESTPSQL -c "select pg_stat_reset_single_table_counters(relid) from pg_stat_user_indexes"
+      $TESTPSQL -c "select pg_stat_reset_single_table_counters(indexrelid) from pg_stat_user_indexes"
       if [ -z "$SETRATES" ] ; then
         echo Run set \#$t of $SETTIMES with $c clients scale=$SCALE
         ./benchwarmer $c
