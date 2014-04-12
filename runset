@@ -39,7 +39,7 @@ for SCALE in $SCALES; do
     $TESTPSQL -c "vacuum"
 
     echo Creating new pgbench tables
-    $PGBENCHBIN -i -s $SCALE -h $TESTHOST -U $TESTUSER -p $TESTPORT $TESTDB
+    $PGBENCHBIN -i --unlogged-tables -s $SCALE -h $TESTHOST -U $TESTUSER -p $TESTPORT $TESTDB
   fi
   #
   # Run the main test
@@ -57,7 +57,7 @@ for SCALE in $SCALES; do
           ./benchwarmer $c $r
         done 
       fi
-      $TESTPSQL -c "select 'Set: $t, scale: $SCALE, clients: $c' as about, * from pg_statio_user_tables order by relname" >> cache
+      $TESTPSQL -c "select now(), 'Set: $t, scale: $SCALE, clients: $c' as about, * from pg_statio_user_tables order by relname" >> cache
       echo
     done
   done
