@@ -1,6 +1,6 @@
-set term png size 640,480
-set terminal png medium
-set output "clients.png"
+set term svg enhanced mouse size 800,600
+set terminal svg
+set output "clients.svg"
 set title "pgbench transactions/sec"
 set grid xtics ytics
 set xlabel "Clients"

@@ -1,6 +1,6 @@
-set term png size 640,480
-set terminal png small
-set output "3d.png"
+set term svg enhanced mouse size 800,600
+set terminal svg size 800,600
+set output "3d.svg"
 set title "pgbench transactions/sec"
 set ylabel "Scaling factor"
 set yrange [*:*] reverse

@@ -33,17 +33,17 @@ function sed-i {
 # Produce combined report, averaged across all test sets
 $RESULTPSQL -At -F" " -c "select scale,round(avg(dbsize) / (1024 * 1024)) as dbsize,round(avg(tps)) as tps from tests group by scale order by scale" > scaling.txt
 gnuplot plots/scaling.plot 2>&1 | grep -v "Warning: empty"
-mv scaling.png results/
+mv scaling.svg results/
 rm scaling.txt
 
 $RESULTPSQL -At -F" " -c "select clients,round(avg(tps)) as tps from tests group by clients order by clients" > clients.txt
 gnuplot plots/clients.plot 2>&1 | grep -v "Warning: empty"
-mv clients.png results/
+mv clients.svg results/
 rm clients.txt
 
 $RESULTPSQL -At -F" " -c "select scale,clients,round(avg(tps)) as tps from tests group by scale,clients order by scale,clients" > 3d.txt
 gnuplot plots/3d.plot 2>&1 | grep -v "Warning: empty"
-mv 3d.png results/
+mv 3d.svg results/
 rm 3d.txt
 
 # Copy the header HTML template to our outfile
@@ -54,12 +54,12 @@ else
 fi
 
 echo "<h3>Averages across all test sets:</h3>" >> $OUTFILE
-echo "<img src=\"scaling.png\"><p>" >> $OUTFILE
-echo "<img src=\"clients.png\"><p>" >> $OUTFILE
-echo "<img src=\"3d.png\"><p>" >> $OUTFILE
+echo "<img src=\"scaling.svg\"><p>" >> $OUTFILE
+echo "<img src=\"clients.svg\"><p>" >> $OUTFILE
+echo "<img src=\"3d.svg\"><p>" >> $OUTFILE
 echo "<h3>Test sets comparison:</h3>" >> $OUTFILE
-echo "<img src=\"scaling-sets.png\"><p>" >> $OUTFILE
-echo "<img src=\"clients-sets.png\"><p>" >> $OUTFILE
+echo "<img src=\"scaling-sets.svg\"><p>" >> $OUTFILE
+echo "<img src=\"clients-sets.svg\"><p>" >> $OUTFILE
 
 # Loop over all the active test sets
 SETS=`$RESULTPSQL -A -t -c "select set from tests group by set order by set"`
@@ -83,24 +83,24 @@ for SET in $SETS ; do
   # Generate graphs for just this test set
   $RESULTPSQL -At -F" " -c "select scale,round(avg(dbsize) / (1024 * 1024)) as dbsize,round(avg(tps)) as tps from tests where set='$SET' group by scale order by scale" > scaling.txt
   gnuplot plots/scaling.plot 2>&1 | grep -v "Warning: empty"
-  mv scaling.png results/scaling-$SET.png
+  mv scaling.svg results/scaling-$SET.svg
   mv scaling.txt scaling-$SET.txt
 
   $RESULTPSQL -At -F" " -c "select clients,round(avg(tps)) as tps from tests where set='$SET' group by clients order by clients" > clients.txt
   gnuplot plots/clients.plot 2>&1 | grep -v "Warning: empty"
-  mv clients.png results/clients-$SET.png
+  mv clients.svg results/clients-$SET.svg
   mv clients.txt clients-$SET.txt
 
   $RESULTPSQL -At -F" " -c "select scale,clients,round(avg(tps)) as tps from tests where set='$SET' group by scale,clients order by scale,clients" > 3d.txt
   gnuplot plots/3d.plot 2>&1 | grep -v "Warning: empty"
-  mv 3d.png results/3d-$SET.png
+  mv 3d.svg results/3d-$SET.svg
   rm 3d.txt
 
-  echo "<img src=\"scaling-$SET.png\"><p>" >> $OUTFILE
-  echo "<img src=\"clients-$SET.png\"><p>" >> $OUTFILE
+  echo "<img src=\"scaling-$SET.svg\"><p>" >> $OUTFILE
+  echo "<img src=\"clients-$SET.svg\"><p>" >> $OUTFILE
   # The 3D results set isn't that useful, don't want to repeat it for
   # every single set, too
-  # echo "<img src=\"3d-$SET.png\"><p>" >> $OUTFILE
+  # echo "<img src=\"3d-$SET.svg\"><p>" >> $OUTFILE
 
   # Summarize the test set
   echo Averages for test set $SET by scale: >> $OUTFILE
@@ -131,8 +131,8 @@ done
 
 # Plot set comparison
 cat > multi-client.plot << "ENDING"
-set terminal png medium size 640,480
-set output "clients-sets.png"
+set terminal svg size 640,480
+set output "clients-sets.svg"
 set title "pgbench transactions/sec"
 set grid xtics ytics
 set xlabel "Clients"
@@ -141,8 +141,8 @@ plot \
 ENDING
 
 cat > multi-scale.plot << "ENDING"
-set terminal png medium size 640,480
-set output "scaling-sets.png"
+set terminal svg size 640,480
+set output "scaling-sets.svg"
 set title "pgbench transactions/sec"
 set grid xtics ytics
 set xlabel "Scaling factor"
@@ -166,8 +166,8 @@ done
 
 gnuplot multi-scale.plot 2>&1 | grep -v "Warning: empty"
 gnuplot multi-client.plot 2>&1 | grep -v "Warning: empty"
-mv clients-sets.png results/
-mv scaling-sets.png results/
+mv clients-sets.svg results/
+mv scaling-sets.svg results/
 rm multi-scale.plot
 rm multi-client.plot
 
