@@ -113,7 +113,7 @@ for SET in $SETS ; do
   $RESULTPSQL -H -c "select set,scale,clients,rate_limit,round(avg(tps)) as tps,round(1000*avg(avg_latency))/1000 as avg_latency,round(1000*avg(percentile_90_latency))/1000 as \"90%<\",round(1000 * avg(max_latency))/1000 as max_latency from tests where tests.set='$SET' group by set,scale,clients,rate_limit order by set,scale,clients,rate_limit;" >> $OUTFILE
 
   echo Detail for test set $SET: >> $OUTFILE
-  # Create a line showing the results for every test as an HTML table  
+  # Create a line showing the results for every test as an HTML table
   $RESULTPSQL -H -c "select set,'<a href=\"' || tests.test || '/index.html\">' || tests.test || '</a>' as test,scale,clients,rate_limit,round(tps) as tps,max_latency, checkpoints_timed+checkpoints_req as chkpts,buffers_checkpoint as buf_check,buffers_clean as buf_clean,buffers_backend as buf_backend,buffers_alloc as buf_alloc, maxwritten_clean as max_clean, buffers_backend_fsync as backend_sync, max_dirty, wal_written,cleanup from test_bgwriter right join tests on tests.test=test_bgwriter.test where tests.set='$SET' order by set,scale,clients,rate_limit,tests.test;" > temp.txt
 
   # Now we need to fix lines like this
@@ -131,20 +131,22 @@ done
 
 # Plot set comparison
 cat > multi-client.plot << "ENDING"
-set terminal svg size 640,480
+set terminal svg size 800,600
 set output "clients-sets.svg"
 set title "pgbench transactions/sec"
-set grid xtics ytics
+set mytics
+set grid xtics ytics mytics
 set xlabel "Clients"
 set ylabel "TPS"
 plot \
 ENDING
 
 cat > multi-scale.plot << "ENDING"
-set terminal svg size 640,480
+set terminal svg size 800,600
 set output "scaling-sets.svg"
 set title "pgbench transactions/sec"
-set grid xtics ytics
+set mytics
+set grid xtics ytics mytics
 set xlabel "Scaling factor"
 set ylabel "TPS"
 plot \

@@ -1,8 +1,9 @@
 set term svg enhanced mouse size 800,600
 set terminal svg
 set output "clients.svg"
+set mytics
 set title "pgbench transactions/sec"
-set grid xtics ytics
+set grid xtics ytics mytics
 set xlabel "Clients"
 set ylabel "TPS"
 plot \
