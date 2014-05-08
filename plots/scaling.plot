@@ -1,6 +1,6 @@
-set term png size 640,480
-set terminal png medium
-set output "scaling.png"
+set term svg enhanced mouse size 640,480
+set terminal svg size 640,480
+set output "scaling.svg"
 set title "pgbench transactions/sec"
 set grid xtics ytics
 set xlabel "Scaling factor"

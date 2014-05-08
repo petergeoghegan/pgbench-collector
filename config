@@ -18,7 +18,7 @@ TESTDIR="tests"
 SKIPINIT=0
 
 # Set TABBED to 1 to use Javascript for a multi-tabbed display format
-TABBED=0
+TABBED=1
 
 # Set OSDATA to 1 to collect OS data using vmstat and iostat
 OSDATA=1
@@ -45,14 +45,14 @@ MAX_WORKERS=`nproc`
 #MAX_WORKERS=""
 
 SCRIPT="select.sql"
-SCALES="1 10 100 1000"
-SETCLIENTS="1 2 4 8 16 32"
+SCALES="1"
+SETCLIENTS="1 10"
 SETTIMES=3
 
 # RUNTIME is in seconds.  If it is specified, then TOTTRANS is ignored.
 # Setting a time instead of a transaction account is only available
 # in 8.4 and later.
-RUNTIME=60
+RUNTIME=15
 TOTTRANS=""
 
 # Use a transaction count instead for 8.3 or earlier

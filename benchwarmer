@@ -24,11 +24,8 @@ fi
 # Query the test database and put its background writer statistics into
 # a set of environment variables, probably for use inserting stats into
 # the results database.
-#
-# This presumes that you have already set $BACKEND_FSYNC before
-# calling.
 function get_bgwriter {
-  BGW=`$TESTPSQL -A -t -F" " -c "select checkpoints_timed,checkpoints_req,buffers_checkpoint,buffers_clean,maxwritten_clean,buffers_backend,buffers_alloc,$BACKEND_FSYNC from pg_stat_bgwriter"`
+  BGW=`$TESTPSQL -A -t -F" " -c "select checkpoints_timed,checkpoints_req,buffers_checkpoint,buffers_clean,maxwritten_clean,buffers_backend,buffers_alloc, buffers_backend_fsync from pg_stat_bgwriter"`
   set -- $BGW
   checkpoints_timed=$1
   checkpoints_req=$2
@@ -150,7 +147,7 @@ if [ "$SKIPINIT" -ne "1" ]; then
   # tend to run slowly.
   CLEANED=`$RESULTPSQL -A -t -c "SELECT EXISTS(SELECT 1 FROM tests WHERE cleanup IS NOT NULL AND ((now() - end_time) + cleanup) < '100 seconds'::interval ORDER BY test DESC LIMIT 1)"`
   if [ "$CLEANED" = 'f' ] ; then
-    $TESTPSQL -c "vacuum analyze"
+    $TESTPSQL -c "vacuum"
   else
     echo "Skipping vacuum, it was recently ran by the last test"
   fi
@@ -164,7 +161,7 @@ if [ "$SKIPINIT" -ne "1" ]; then
     CHECK=`$TESTPSQL -At -c "SELECT checkpoints_req FROM pg_stat_bgwriter"`
     if [ "$CHECK" -gt "$STARTCHECK" ] ; then
       break
-    fi 
+    fi
     sleep 1
   done
 
@@ -184,14 +181,6 @@ if [ -z "$TEST" ]; then
   exit
 fi
 
-# Figure out if this version of PostgreSQL includes buffers_backend_fsync
-$TESTPSQL -c "SELECT buffers_backend_fsync FROM pg_stat_bgwriter" >> /dev/null 2>&1
-if [ "$?" -ne "0" ]; then
-  BACKEND_FSYNC="0"
-else
-  BACKEND_FSYNC="buffers_backend_fsync"
-fi
-
 # Grab starting values for statistics
 get_bgwriter
 START_WAL=`$TESTPSQL -A -t -F" " -c "select pg_current_xlog_location()"`
@@ -203,12 +192,8 @@ mkdir -p results/$TEST
 
 # Start background daemon collectors
 if [ "$OSDATA" -eq "1" ]; then
-  ./timed-os-stats vmstat > results/$TEST/vmstat.log &
-  VMSTAT=$!
-  ./timed-os-stats iostat > results/$TEST/iostat.log &
-  IOSTAT=$!
-  ./timed-os-stats meminfo > results/$TEST/meminfo.log &
-  MEMINFO=$!
+  ./timed-os-stats dstat > results/$TEST/dstat.log &
+  DSTAT=$!
 fi
 
 # Run the main pgbench test
@@ -223,16 +208,25 @@ if [ "$OSDATA" -eq "1" ]; then
   # The PIDs we have will be the process ID of the Python timed-os-stats
   # process, but we must make sure to also kill the child processes (launched
   # via subprocess.Popen()) so they are not lingering forever.
-  ../../kill_pg "${VMSTAT}"
-  ../../kill_pg "${IOSTAT}"
-  ../../kill_pg "${MEMINFO}"
+  ../../kill_pg "${DSTAT}"
+  grep -Ev 'time|date|---|Terminated' dstat.log | sed 's/|/| /g' > $BASEDIR/stat.stat
+  cd $BASEDIR
+  $BASEDIR/memory
+  $BASEDIR/disk
+  $BASEDIR/cpu
+  $BASEDIR/paging
+  $BASEDIR/swap
+  $BASEDIR/system
+  cd results/$TEST
+  mv $BASEDIR/memory.svg $BASEDIR/results/$TEST
+  mv $BASEDIR/disk.svg $BASEDIR/results/$TEST
+  mv $BASEDIR/cpu.svg $BASEDIR/results/$TEST
+  mv $BASEDIR/paging.svg $BASEDIR/results/$TEST
+  mv $BASEDIR/swap.svg $BASEDIR/results/$TEST
+  mv $BASEDIR/system.svg $BASEDIR/results/$TEST
 fi
 
-# Find largest dirty memory value (which is in kB)
-max_dirty=`cat meminfo.log | grep Dirty | awk '{print $4}' | sort -n | tail -n 1`
-if [ -z "$max_dirty" ] ; then
- max_dirty=0 
-fi
+max_dirty=0
 
 # Update bgwriter data with delta
 get_bgwriter
@@ -306,12 +300,10 @@ else
   gnuplot $BASEDIR/latency.script
 
   $RESULTPSQL -q -c "update tests set avg_latency=(select avg(latency) from timing where tests.test=timing.test), max_latency=(select max(latency)from timing where tests.test=timing.test), percentile_90_latency=(select latency from timing where tests.test=timing.test order by latency offset (round(0.90*trans)) limit 1) where tests.test='$TEST'"
-
-  $BASEDIR/dirty-plot < meminfo.log > dirtydata.txt
-  gnuplot $BASEDIR/dirty.script
 fi
 
 cp $BASEDIR/test-index.html index.html
+echo "<title>Test $TEST, clients: $CLIENTS</title>" >> index.html
 
 # Now that we're done plotting and computing stats, wipe the low-level
 # data we don't need anymore
@@ -370,4 +362,3 @@ rm pgbench.log
 rm timing.csv
 rm tpsdata.txt
 rm latency.txt
-rm dirtydata.txt

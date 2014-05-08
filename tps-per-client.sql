@@ -7,6 +7,6 @@ SELECT
   round(avg(tps)/clients) as tps_per_client,
   round(1000 * avg(max_latency))/1000 AS max_latency ,
   to_char(avg(end_time -  start_time),'HH24:MI:SS') AS runtime
-FROM tests 
-GROUP BY set,scale,clients 
-ORDER BY set,scale,clients; 
+FROM tests
+GROUP BY set, scale, clients
+ORDER BY set, scale, clients;
