@@ -27,7 +27,7 @@ fi
 
 for SCALE in $SCALES; do
   #
-  # Have a consistent, clean set of pgbench tables to start 
+  # Have a consistent, clean set of pgbench tables to start
   # each test run with
   #
 
@@ -53,7 +53,7 @@ for SCALE in $SCALES; do
         for r in $SETRATES; do
           echo Run set \#$t of $SETTIMES with $c clients scale=$SCALE rate=$r
           ./benchwarmer $c $r
-        done 
+        done
       fi
       echo
     done

@@ -50,7 +50,7 @@ SETTIMES=3
 # RUNTIME is in seconds.  If it is specified, then TOTTRANS is ignored.
 # Setting a time instead of a transaction account is only available
 # in 8.4 and later.
-RUNTIME=1
+RUNTIME=15
 TOTTRANS=""
 
 # Use a transaction count instead for 8.3 or earlier

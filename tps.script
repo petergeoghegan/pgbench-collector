@@ -1,4 +1,4 @@
-set terminal svg size 640,480
+set terminal svg size 800,600
 set output "tps.svg"
 set title "TPS"
 set grid xtics mxtics ytics mytics

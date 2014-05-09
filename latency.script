@@ -1,5 +1,5 @@
-set terminal svg size 640,480
-set output "latency.svg"
+set terminal png size 800,600
+set output "latency.png"
 set title "Latency"
 set grid xtics ytics
 set xlabel "Time during test"
