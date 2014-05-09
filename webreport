@@ -41,11 +41,6 @@ gnuplot plots/clients.plot 2>&1 | grep -v "Warning: empty"
 mv clients.svg results/
 rm clients.txt
 
-$RESULTPSQL -At -F" " -c "select scale,clients,round(avg(tps)) as tps from tests group by scale,clients order by scale,clients" > 3d.txt
-gnuplot plots/3d.plot 2>&1 | grep -v "Warning: empty"
-mv 3d.svg results/
-rm 3d.txt
-
 # Copy the header HTML template to our outfile
 if [ "$TABBED" -eq "1" ]; then
   cp templates/header-tabbed.html $OUTFILE
@@ -56,7 +51,6 @@ fi
 echo "<h3>Averages across all test sets:</h3>" >> $OUTFILE
 echo "<img src=\"scaling.svg\"><p>" >> $OUTFILE
 echo "<img src=\"clients.svg\"><p>" >> $OUTFILE
-echo "<img src=\"3d.svg\"><p>" >> $OUTFILE
 echo "<h3>Test sets comparison:</h3>" >> $OUTFILE
 echo "<img src=\"scaling-sets.svg\"><p>" >> $OUTFILE
 echo "<img src=\"clients-sets.svg\"><p>" >> $OUTFILE
@@ -91,30 +85,74 @@ for SET in $SETS ; do
   mv clients.svg results/clients-$SET.svg
   mv clients.txt clients-$SET.txt
 
-  $RESULTPSQL -At -F" " -c "select scale,clients,round(avg(tps)) as tps from tests where set='$SET' group by scale,clients order by scale,clients" > 3d.txt
-  gnuplot plots/3d.plot 2>&1 | grep -v "Warning: empty"
-  mv 3d.svg results/3d-$SET.svg
-  rm 3d.txt
-
   echo "<img src=\"scaling-$SET.svg\"><p>" >> $OUTFILE
   echo "<img src=\"clients-$SET.svg\"><p>" >> $OUTFILE
-  # The 3D results set isn't that useful, don't want to repeat it for
-  # every single set, too
-  # echo "<img src=\"3d-$SET.svg\"><p>" >> $OUTFILE
 
   # Summarize the test set
   echo Averages for test set $SET by scale: >> $OUTFILE
-  $RESULTPSQL -H -c "select set,scale,round(avg(tps)) as tps,round(1000*avg(avg_latency))/1000 as avg_latency,round(1000*avg(percentile_90_latency))/1000 as \"90%<\",round(1000 * avg(max_latency))/1000 as max_latency from tests where tests.set='$SET' group by set,scale order by set,scale;" >> $OUTFILE
+  $RESULTPSQL -H -X >> $OUTFILE <<ff
+  select set,
+	 scale,
+	 to_char(round(avg(tps)), 'FM9G999G999G999G999') as avg_tps,
+	 round(1000 * avg(avg_latency)) / 1000 as avg_avg_latency,
+	 round(1000 * avg(percentile_90_latency)) / 1000 as "avg 90%<",
+	 round(1000 * max(max_latency)) / 1000 as max_latency
+	 from tests where tests.set='$SET'
+	 group by set, scale
+	 order by set, scale;
+ff
 
   echo Averages for test set $SET by clients: >> $OUTFILE
-  $RESULTPSQL -H -c "select set,clients,round(avg(tps)) as tps,round(1000*avg(avg_latency))/1000 as avg_latency,round(1000*avg(percentile_90_latency))/1000 as \"90%<\",round(1000 * avg(max_latency))/1000 as max_latency from tests where tests.set='$SET' group by set,clients order by set,clients;" >> $OUTFILE
+  $RESULTPSQL -H -X >> $OUTFILE <<ff
+  select set,
+	  clients,
+	  to_char(round(avg(tps)), 'FM9G999G999G999G999') as tps,
+	  round(1000 * avg(avg_latency)) / 1000 as avg_avg_latency,
+	  round(1000 * avg(percentile_90_latency)) / 1000 as "avg 90%<",
+	  round(1000 * max(max_latency)) / 1000 as max_latency
+	  from tests where tests.set='$SET'
+	  group by set, clients
+	  order by set, clients;
+ff
 
   echo Averages for test set $SET by scale, client, and rate limit: >> $OUTFILE
-  $RESULTPSQL -H -c "select set,scale,clients,rate_limit,round(avg(tps)) as tps,round(1000*avg(avg_latency))/1000 as avg_latency,round(1000*avg(percentile_90_latency))/1000 as \"90%<\",round(1000 * avg(max_latency))/1000 as max_latency from tests where tests.set='$SET' group by set,scale,clients,rate_limit order by set,scale,clients,rate_limit;" >> $OUTFILE
+  $RESULTPSQL -H -X >> $OUTFILE <<ff
+  select set,
+	  scale,
+	  clients,
+	  coalesce(rate_limit::text, '(none)') as rate_limit,
+	  to_char(round(avg(tps)), 'FM9G999G999G999G999') as avg_tps,
+	  round(1000 * avg(avg_latency)) / 1000 as avg_avg_latency,
+	  round(1000 * avg(percentile_90_latency)) / 1000 as "avg 90%<",
+	  round(1000 * max(max_latency)) / 1000 as max_latency
+        from tests where tests.set='$SET'
+	group by set, scale, clients, rate_limit
+	order by set, scale, clients, rate_limit;
+ff
 
   echo Detail for test set $SET: >> $OUTFILE
   # Create a line showing the results for every test as an HTML table
-  $RESULTPSQL -H -c "select set,'<a href=\"' || tests.test || '/index.html\">' || tests.test || '</a>' as test,scale,clients,rate_limit,round(tps) as tps,max_latency, checkpoints_timed+checkpoints_req as chkpts,buffers_checkpoint as buf_check,buffers_clean as buf_clean,buffers_backend as buf_backend,buffers_alloc as buf_alloc, maxwritten_clean as max_clean, buffers_backend_fsync as backend_sync, max_dirty, wal_written,cleanup from test_bgwriter right join tests on tests.test=test_bgwriter.test where tests.set='$SET' order by set,scale,clients,rate_limit,tests.test;" > temp.txt
+  $RESULTPSQL -H -X > temp.txt <<ff
+  select set,'<a href="' || tests.test || '/index.html">' || tests.test || '</a>' as test,
+	scale,
+	clients,
+	coalesce(rate_limit::text, '(none)') as rate_limit,
+	to_char(round(tps), 'FM9G999G999G999G999') as tps,
+	round(1000 * avg_latency) / 1000 as avg_latency,
+	max_latency,
+	to_char(checkpoints_timed + checkpoints_req, 'FM9G999G999G999G999') as chkpts,
+	to_char(buffers_checkpoint , 'FM9G999G999G999G999') as buf_check,
+	to_char(buffers_clean , 'FM9G999G999G999G999') as buf_clean,
+	to_char(buffers_backend, 'FM9G999G999G999G999') as buf_backend,
+	to_char(buffers_alloc, 'FM9G999G999G999G999') as buf_alloc,
+	to_char(maxwritten_clean, 'FM9G999G999G999G999') as max_clean,
+	to_char(max_dirty, 'FM9G999G999G999G999') as max_dirty,
+	to_char(wal_written, 'FM9G999G999G999G999') as wal_written,
+	cleanup
+	from test_bgwriter right join tests on tests.test = test_bgwriter.test
+	where tests.set='$SET'
+	order by set, scale, clients, rate_limit, tests.test;
+ff
 
   # Now we need to fix lines like this
   # <td align="left">&lt;a href=&quot;results/201/&quot;&gt;201&lt;/a&gt;</td>

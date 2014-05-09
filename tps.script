@@ -1,7 +1,7 @@
 set terminal svg size 640,480
 set output "tps.svg"
 set title "TPS"
-set grid xtics ytics
+set grid xtics mxtics ytics mytics
 set xlabel "Time during test"
 set ylabel "TPS"
 set xdata time
