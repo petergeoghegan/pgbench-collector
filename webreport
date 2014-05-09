@@ -62,12 +62,14 @@ SETS=`$RESULTPSQL -A -t -c "select set from tests group by set order by set"`
 echo '<ul>' >> $OUTFILE
 for SET in $SETS ; do
   DESCR=`$RESULTPSQL -A -t -c "select info from testset where set='$SET'"`
-  echo "<li><a href='#set-$SET'>Test Set $SET - $DESCR</a></li>" >> $OUTFILE
+  echo "<li><a href='#set-$SET'>$DESCR</a></li>" >> $OUTFILE
 done
 echo '</ul>' >> $OUTFILE
 
 for SET in $SETS ; do
   DESCR=`$RESULTPSQL -A -t -c "select info from testset where set='$SET'"`
+  STARTED=`$RESULTPSQL -A -t -c "select to_char(min(start_time), 'YYYY-MM-DD HH24:MI:SS') from tests where set='$SET'"`
+  FINISHED=`$RESULTPSQL -A -t -c "select to_char(max(end_time), 'YYYY-MM-DD HH24:MI:SS') from tests where set='$SET'"`
   echo "<div id='set-$SET'>" >> $OUTFILE
   echo "<hr><h3>Set" $SET : $DESCR"</h3>" >> $OUTFILE
 
@@ -84,9 +86,6 @@ for SET in $SETS ; do
   gnuplot plots/clients.plot 2>&1 | grep -v "Warning: empty"
   mv clients.svg results/clients-$SET.svg
   mv clients.txt clients-$SET.txt
-
-  echo "<img src=\"scaling-$SET.svg\"><p>" >> $OUTFILE
-  echo "<img src=\"clients-$SET.svg\"><p>" >> $OUTFILE
 
   # Summarize the test set
   echo Averages for test set $SET by scale: >> $OUTFILE
@@ -148,6 +147,7 @@ ff
 	to_char(maxwritten_clean, 'FM9G999G999G999G999') as max_clean,
 	to_char(max_dirty, 'FM9G999G999G999G999') as max_dirty,
 	to_char(wal_written, 'FM9G999G999G999G999') as wal_written,
+	to_char(start_time, 'HH24:MI:SS') as start,
 	cleanup
 	from test_bgwriter right join tests on tests.test = test_bgwriter.test
 	where tests.set='$SET'
@@ -161,9 +161,13 @@ ff
   sed-i "s/&gt;/>/g" temp.txt
   sed-i "s/&quot;/\"/g" temp.txt
   cat temp.txt >> $OUTFILE
+  echo "<hr><h6>($DESCR started $STARTED, finished $FINISHED)</h6></hr>" >> $OUTFILE
+  echo "<img src=\"scaling-$SET.svg\"><p>" >> $OUTFILE
+  echo "<img src=\"clients-$SET.svg\"><p>" >> $OUTFILE
+
   # Remove row counts
   cp $OUTFILE temp.txt
-  cat temp.txt | grep -v " rows)" > $OUTFILE
+  cat temp.txt | grep -v " rows*)" > $OUTFILE
   echo "</div>" >> $OUTFILE
 done
 
