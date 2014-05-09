@@ -105,7 +105,7 @@ ff
   $RESULTPSQL -H -X >> $OUTFILE <<ff
   select set,
 	  clients,
-	  to_char(round(avg(tps)), 'FM9G999G999G999G999') as tps,
+	  to_char(round(avg(tps)), 'FM9G999G999G999G999') as avg_tps,
 	  round(1000 * avg(avg_latency)) / 1000 as avg_avg_latency,
 	  round(1000 * avg(percentile_90_latency)) / 1000 as "avg 90%<",
 	  round(1000 * max(max_latency)) / 1000 as max_latency
@@ -121,6 +121,7 @@ ff
 	  clients,
 	  coalesce(rate_limit::text, '(none)') as rate_limit,
 	  to_char(round(avg(tps)), 'FM9G999G999G999G999') as avg_tps,
+	  to_char(round(stddev(tps)), 'FM9G999G999G999G999') as tps_stddev,
 	  round(1000 * avg(avg_latency)) / 1000 as avg_avg_latency,
 	  round(1000 * avg(percentile_90_latency)) / 1000 as "avg 90%<",
 	  round(1000 * max(max_latency)) / 1000 as max_latency
