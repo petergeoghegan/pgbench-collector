@@ -1,0 +1,11 @@
+#!/usr/bin/gnuplot
+set terminal svg size 800,600
+set output "system.svg"
+set title "system"
+set xlabel "time"
+set ylabel "events"
+set xdata time
+set timefmt "%d-%m %H:%M:%S"
+set format x "%H:%M"
+plot "stat.stat" using 1:19 title "interrupts" with lines, \
+"stat.stat" using 1:20 title "cswitches" with lines

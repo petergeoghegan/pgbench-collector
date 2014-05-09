@@ -1,0 +1,16 @@
+#!/usr/bin/gnuplot
+set terminal svg size 800,600
+set style data lines
+set output "cpu.svg"
+set title "CPU usage"
+set xlabel "time"
+set ylabel "percent"
+set xdata time
+set timefmt "%d-%m %H:%M:%S"
+set format x "%H:%M"
+plot "stat.stat" using 1:3 title "usr" w line, \
+"stat.stat" using 1:4 title "sys" with line, \
+"stat.stat" using 1:5 title "idle" with line, \
+"stat.stat" using 1:6 title "wait" with line, \
+"stat.stat" using 1:7 title "hiq" with line, \
+"stat.stat" using 1:8 title "siq" with line

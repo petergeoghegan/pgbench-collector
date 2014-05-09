@@ -1,0 +1,11 @@
+#!/usr/bin/gnuplot
+set terminal svg size 800,600
+set output "disk.svg"
+set title "disk"
+set xlabel "time"
+set ylabel "disk operations"
+set xdata time
+set timefmt "%d-%m %H:%M:%S"
+set format x "%H:%M"
+plot "stat.stat" using 1:22 title "disk reads" with lines, \
+"stat.stat" using 1:23 title "disk writes" with lines

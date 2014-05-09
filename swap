@@ -1,0 +1,11 @@
+#!/usr/bin/gnuplot
+set terminal svg size 800,600
+set output "swap.svg"
+set title "swap"
+set xlabel "time"
+set ylabel "pages"
+set xdata time
+set timefmt "%d-%m %H:%M:%S"
+set format x "%H:%M"
+plot "stat.stat" using 1:13 title "used" with lines, \
+"stat.stat" using 1:14 title "free" with lines
