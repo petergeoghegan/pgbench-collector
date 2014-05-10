@@ -147,7 +147,8 @@ if [ "$SKIPINIT" -ne "1" ]; then
   # tend to run slowly.
   CLEANED=`$RESULTPSQL -A -t -c "SELECT EXISTS(SELECT 1 FROM tests WHERE cleanup IS NOT NULL AND ((now() - end_time) + cleanup) < '100 seconds'::interval ORDER BY test DESC LIMIT 1)"`
   if [ "$CLEANED" = 'f' ] ; then
-    $TESTPSQL -c "vacuum"
+    # VACUUM VERBOSE -- additional verbosity gives at least some indication of progress
+    $TESTPSQL -c "VACUUM VERBOSE"
   else
     echo "Skipping vacuum, it was recently ran by the last test"
   fi
@@ -259,8 +260,8 @@ if [ "$SKIPINIT" -ne "1" ]; then
     $TESTPSQL -c "truncate table ${TABLEPREFIX}history"
   fi
   VACUUMSTART=`$RESULTPSQL -A -t -c "SELECT now()"`
-  $TESTPSQL -c "vacuum"
-  $TESTPSQL -c "checkpoint"
+  $TESTPSQL -c "VACUUM VERBOSE"
+  $TESTPSQL -c "CHECKPOINT"
   $RESULTPSQL -q -c "UPDATE tests SET cleanup=now() - '$VACUUMSTART'::timestamp WHERE test=$TEST"
 fi
 
