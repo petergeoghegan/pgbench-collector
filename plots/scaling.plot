@@ -1,4 +1,4 @@
-set term svg enhanced mouse size 640,480
+set term svg enhanced size 640,480
 set terminal svg size 640,480
 set output "scaling.svg"
 set title "pgbench transactions/sec"

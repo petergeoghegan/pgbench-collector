@@ -1,5 +1,5 @@
 #!/usr/bin/gnuplot
-set terminal svg enhanced mouse size 640,480
+set terminal svg enhanced size 640,480
 set output "dirty.svg"
 set title "Dirty Memory"
 set grid xtics mxtics ytics mytics

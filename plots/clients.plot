@@ -1,4 +1,4 @@
-set term svg enhanced mouse size 800,600
+set term svg enhanced size 800,600
 set terminal svg
 set output "clients.svg"
 set mytics
