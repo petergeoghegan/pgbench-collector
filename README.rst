@@ -57,6 +57,7 @@ Results
 
 * You can check results even as the test is running with::
 
+    cd reports/
     psql -d results -f report.sql
 
   This is unlikely to disrupt the test results very much unless you've
@@ -67,7 +68,7 @@ Results
    * summary.sql
    * bufreport.sql
    * bufsummary.sql
- 
+
 * Once the tests are done, the results/ directory will include
   a HTML subdirectory for each test giving its results,
   in addition to the summary information in the results database.
