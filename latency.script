@@ -7,4 +7,4 @@ set xlabel "Time during test"
 set ylabel "Latency (ms)"
 set xdata time
 set timefmt "%s"
-plot "latency.txt" using 1:2 notitle
+plot "latency.txt" using 1:2 with dots notitle linecolor rgb "purple"
