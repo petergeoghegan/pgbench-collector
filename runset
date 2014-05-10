@@ -36,7 +36,8 @@ for SCALE in $SCALES; do
       echo Removing old pgbench tables
       $TESTPSQL -c "drop table ${TABLEPREFIX}accounts; drop table ${TABLEPREFIX}branches; drop table ${TABLEPREFIX}tellers; drop table ${TABLEPREFIX}history;"
     fi
-    $TESTPSQL -c "vacuum"
+    # VACUUM any other, non-standard tables that might exist within the "pgbench" database
+    $TESTPSQL -c "VACUUM"
 
     echo Creating new pgbench tables
     $PGBENCHBIN -i -s $SCALE -h $TESTHOST -U $TESTUSER -p $TESTPORT $TESTDB
