@@ -211,12 +211,12 @@ if [ "$OSDATA" -eq "1" ]; then
   ../../kill_pg "${DSTAT}"
   grep -Ev 'time|date|---|Terminated' dstat.log | sed 's/|/| /g' > $BASEDIR/stat.stat
   cd $BASEDIR
-  $BASEDIR/memory
-  $BASEDIR/disk
-  $BASEDIR/cpu
-  $BASEDIR/paging
-  $BASEDIR/swap
-  $BASEDIR/system
+  gnuplot $BASEDIR/memory.script
+  gnuplot $BASEDIR/disk.script
+  gnuplot $BASEDIR/cpu.script
+  gnuplot $BASEDIR/paging.script
+  gnuplot $BASEDIR/swap.script
+  gnuplot $BASEDIR/system.script
   cd results/$TEST
   mv $BASEDIR/memory.svg $BASEDIR/results/$TEST
   mv $BASEDIR/disk.svg $BASEDIR/results/$TEST
@@ -303,7 +303,7 @@ else
 fi
 
 cp $BASEDIR/test-index.html index.html
-echo "<title>Test $TEST, clients: $CLIENTS</title>" >> index.html
+echo "<title>Set $SET, Test $TEST, clients: $CLIENTS</title>" >> index.html
 
 # Now that we're done plotting and computing stats, wipe the low-level
 # data we don't need anymore

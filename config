@@ -46,7 +46,7 @@ MAX_WORKERS=`nproc`
 
 SCRIPT="select.sql"
 SCALES="1"
-SETCLIENTS="1 10"
+SETCLIENTS="10"
 SETTIMES=3
 
 # RUNTIME is in seconds.  If it is specified, then TOTTRANS is ignored.

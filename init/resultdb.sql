@@ -3,7 +3,7 @@ BEGIN;
 DROP TABLE IF EXISTS testset;
 CREATE TABLE testset(
   set serial PRIMARY KEY,
-  info text
+  info text UNIQUE
   );
 
 DROP TABLE IF EXISTS tests;
@@ -31,7 +31,7 @@ DROP TABLE IF EXISTS timing;
 -- Staging table, for loading in data from CSV
 CREATE TABLE timing(
   ts timestamp,
-  filenum int, 
+  filenum int,
   latency numeric(9,3),
   test int NOT NULL REFERENCES tests(test)
   );
@@ -72,13 +72,13 @@ CREATE TABLE test_bgwriter(
 CREATE OR REPLACE FUNCTION hex_to_dec (text)
 RETURNS numeric AS
 $$
-DECLARE 
+DECLARE
     r numeric;
     i int;
     digit int;
 BEGIN
     r := 0;
-    FOR i in 1..length($1) LOOP 
+    FOR i in 1..length($1) LOOP
         EXECUTE E'SELECT x\''||substring($1 from i for 1)|| E'\'::integer' INTO digit;
         r := r * 16 + digit;
         END LOOP;

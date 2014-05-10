@@ -1,3 +1,4 @@
+#!/usr/bin/gnuplot
 set terminal svg size 800,600
 set output "tps.svg"
 set title "TPS"
@@ -7,4 +8,3 @@ set ylabel "TPS"
 set xdata time
 set timefmt "%s"
 plot "tpsdata.txt" using 1:2 with lines
-

@@ -1,3 +1,4 @@
+#!/usr/bin/gnuplot
 set terminal svg enhanced mouse size 640,480
 set output "dirty.svg"
 set title "Dirty Memory"
@@ -7,4 +8,3 @@ set ylabel "Dirty Memory kB"
 set xdata time
 set timefmt "%s"
 plot "dirtydata.txt" using 1:2 with lines
-
