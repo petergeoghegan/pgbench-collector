@@ -7,4 +7,5 @@ set xlabel "Time during test"
 set ylabel "TPS"
 set xdata time
 set timefmt "%s"
-plot "tpsdata.txt" using 1:2 with lines notitle
+plot "tpsdata.txt" using 1:2:(1.0) smooth acsplines with lines title "Interpolated Latency (Weighted spline, weight 1)" linecolor rgb "orange", \
+"tpsdata.txt" using 1:2 with lines notitle linecolor rgb "red"
