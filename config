@@ -10,9 +10,6 @@ PGBENCHBIN=`which pgbench`
 # These values are for pgbench 8.4 and later
 TESTDIR="tests"
 
-# Use these values for pgbench 8.3
-#TESTDIR="tests-8.3"
-
 # SKIPINIT should be set to 1 either when simulating a cold cache, or
 # if you are not using the pgbench tables for your test
 SKIPINIT=0
@@ -55,7 +52,7 @@ SETTIMES=3
 RUNTIME=15
 TOTTRANS=""
 
-# Use a transaction count instead for 8.3 or earlier
+# A transaction count may be used instead
 #RUNTIME=""
 #TOTTRANS=100000
 
