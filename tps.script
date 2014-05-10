@@ -7,4 +7,4 @@ set xlabel "Time during test"
 set ylabel "TPS"
 set xdata time
 set timefmt "%s"
-plot "tpsdata.txt" using 1:2 with lines
+plot "tpsdata.txt" using 1:2 with lines notitle
