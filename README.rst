@@ -217,12 +217,6 @@ Known issues
 * On Solaris, where the benchwarmer script calls tail it may need to use
   /usr/xpg4/bin/tail instead
 
-Planned features
-================
-
-* The client+scale data table used to generate the 3D report would be useful to
-  generate in tabular text format as well.
-
 Contact
 =======
 
