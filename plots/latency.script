@@ -4,7 +4,9 @@ set output "latency.png"
 set title "Latency"
 set grid xtics ytics
 set xlabel "Time during test"
+# A yrange min of 0, to avoid interpolation line changing range
 set ylabel "Latency (ms)"
+set yrange [0:]
 set xdata time
 set timefmt "%s"
 plot "latency.txt" using 1:2 with dots notitle linecolor rgb "purple", \

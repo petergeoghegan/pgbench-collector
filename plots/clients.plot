@@ -1,3 +1,4 @@
+#!/usr/bin/gnuplot
 set term svg enhanced size 800,600
 set terminal svg
 set output "clients.svg"
