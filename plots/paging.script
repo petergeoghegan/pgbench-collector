@@ -1,12 +1,14 @@
 #!/usr/bin/gnuplot
 set terminal svg size 800,600
+set datafile separator ","
 set grid xtics ytics
 set output "paging.svg"
 set title "Page Statistics"
 set xlabel "Time during test"
 set ylabel "Pages"
+set yrange [0:]
 set xdata time
 set timefmt "%d-%m %H:%M:%S"
 set format x "%M:%S"
-plot "stat.stat" using 1:16 title "Page In" with lines, \
-"stat.stat" using 1:17 title "Page Out" with lines
+plot "dstat.stat" using 1:14 title "Page In" with lines, \
+"dstat.stat" using 1:15 title "Page Out" with lines

@@ -1,17 +1,19 @@
 #!/usr/bin/gnuplot
 set terminal svg size 800,600
+set datafile separator ","
 set style data lines
 set grid xtics ytics
 set output "cpu.svg"
 set title "CPU Usage"
 set xlabel "Time during test"
 set ylabel "Percent"
+set yrange [0:]
 set xdata time
 set timefmt "%d-%m %H:%M:%S"
 set format x "%M:%S"
-plot "stat.stat" using 1:3 title "usr" w line, \
-"stat.stat" using 1:4 title "sys" with line linewidth 1 linecolor rgb "salmon", \
-"stat.stat" using 1:5 title "idle" with line linewidth 2 linecolor rgb "green", \
-"stat.stat" using 1:6 title "wait" with line linewidth 2 linecolor rgb "red", \
-"stat.stat" using 1:7 title "IRQ servicing interrupts" with line linewidth 1 linecolor rgb "grey", \
-"stat.stat" using 1:8 title "Soft IRQs" with line linewidth 1 linecolor rgb "pink"
+plot "dstat.stat" using 1:2 title "usr" w line linewidth 1 linecolor rgb "blue", \
+"dstat.stat" using 1:3 title "sys" with line linewidth 1 linecolor rgb "salmon", \
+"dstat.stat" using 1:4 title "idle" with line linewidth 2 linecolor rgb "green", \
+"dstat.stat" using 1:5 title "wait" with line linewidth 2 linecolor rgb "red", \
+"dstat.stat" using 1:6 title "IRQ servicing interrupts" with line linewidth 1 linecolor rgb "grey", \
+"dstat.stat" using 1:7 title "Soft IRQs" with line linewidth 1 linecolor rgb "pink"

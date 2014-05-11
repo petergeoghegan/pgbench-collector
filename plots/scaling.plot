@@ -1,3 +1,4 @@
+#!/usr/bin/gnuplot
 set term svg enhanced size 640,480
 set terminal svg size 640,480
 set output "scaling.svg"
@@ -5,6 +6,7 @@ set title "pgbench transactions/sec"
 set grid xtics ytics
 set xlabel "Scaling factor"
 set ylabel "TPS"
+set yrange [0:]
 set y2label "Database Size (MB)"
 set ytics nomirror
 set y2tics

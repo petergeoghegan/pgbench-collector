@@ -1,15 +1,17 @@
 #!/usr/bin/gnuplot
 set terminal svg size 800,600
+set datafile separator ","
 set grid xtics ytics
 set output "system.svg"
 set title "system"
 set xlabel "Time during test"
 set ylabel "Events"
+set yrange [0:]
 set xdata time
 set timefmt "%d-%m %H:%M:%S"
 set format x "%M:%S"
 set style line 1 lc rgb '#8b1a0e' pt 1 ps 1 lt 1 lw 2
 set style line 2 lc rgb '#5e9c36' pt 6 ps 1 lt 1 lw 2
 
-plot "stat.stat" using 1:19 ls 1 title "Interrupts" with lines, \
-"stat.stat" using 1:20 ls 2 title "Context Switches" with lines
+plot "dstat.stat" using 1:16 ls 1 title "Interrupts" with lines, \
+"dstat.stat" using 1:17 ls 2 title "Context Switches" with lines

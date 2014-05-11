@@ -1,14 +1,16 @@
 #!/usr/bin/gnuplot
 set terminal svg size 800,600
+set datafile separator ","
 set output "memory.svg"
 set grid xtics ytics
 set title "Memory Usage"
 set xlabel "Time during test"
 set ylabel "size (MB)"
+set yrange [0:]
 set xdata time
 set timefmt "%d-%m %H:%M:%S"
 set format x "%M:%S"
-plot "stat.stat" using 1:9 title "used" with lines, \
-"stat.stat" using 1:10 title "buff" with lines, \
-"stat.stat" using 1:11 title "cach" with lines, \
-"stat.stat" using 1:12 title "free" with lines
+plot "dstat.stat" using 1:($8/1e6) title "used" with lines, \
+"dstat.stat" using 1:($9/1e6) title "buff" with lines, \
+"dstat.stat" using 1:($10/1e6) title "cach" with lines, \
+"dstat.stat" using 1:($11/1e6) title "free" with lines
