@@ -214,6 +214,8 @@ if [ "$OSDATA" -eq "1" ]; then
   # via subprocess.Popen()) so they are not lingering forever.
   ../../kill_pg "${DSTAT}"
   cat $BASEDIR/dstat.out | grep -E '^[0-9]' > $BASEDIR/dstat.stat
+  $RESULTPSQL -c "copy temp_test_dstat from stdin with csv" < $BASEDIR/dstat.stat
+  $RESULTPSQL -c "select convert_dstats('$TEST'::int)"
   rm $BASEDIR/dstat.out
   cd $BASEDIR
   gnuplot $BASEDIR/plots/memory.script

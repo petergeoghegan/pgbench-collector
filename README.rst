@@ -52,8 +52,8 @@ pgbench-collector setup
 
     ./newset 'Initial Config'
 
-  Running the "newset" utility without any parameters will list all of the
-  existing test sets.
+  Note that each set must have a unique description. Running the "newset"
+  utility without any parameters will list all of the existing test sets.
 
 Running tests
 =============

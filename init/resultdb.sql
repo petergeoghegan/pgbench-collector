@@ -1,12 +1,12 @@
 BEGIN;
 
-DROP TABLE IF EXISTS testset;
+DROP TABLE IF EXISTS testset CASCADE;
 CREATE TABLE testset(
   set serial PRIMARY KEY,
   info text UNIQUE
   );
 
-DROP TABLE IF EXISTS tests;
+DROP TABLE IF EXISTS tests CASCADE;
 CREATE TABLE tests(
   test serial PRIMARY KEY,
   set int NOT NULL REFERENCES testset(set) ON DELETE CASCADE,
@@ -29,7 +29,7 @@ CREATE TABLE tests(
 
 DROP TABLE IF EXISTS timing;
 -- Staging table, for loading in data from CSV
-CREATE TABLE timing(
+CREATE UNLOGGED TABLE timing(
   ts timestamp,
   filenum int,
   latency numeric(9,3),
@@ -50,6 +50,56 @@ CREATE TABLE test_bgwriter(
   buffers_alloc bigint,
   buffers_backend_fsync bigint,
   max_dirty bigint
+);
+
+DROP TABLE IF EXISTS test_dstat;
+CREATE TABLE test_dstat(
+  dstatid bigserial PRIMARY KEY,
+  test int REFERENCES tests(test) ON DELETE CASCADE,
+  taken timestamptz NOT NULL,
+  cpu_perc_usr numeric,
+  cpu_perc_sys numeric,
+  cpu_perc_idle numeric,
+  cpu_perc_wait numeric,
+  cpu_perc_hiq numeric,
+  cpu_perc_siq numeric,
+  mem_used_bytes bigint,
+  mem_buff_bytes bigint,
+  mem_cache_bytes bigint,
+  mem_free_bytes bigint,
+  swap_pages_used bigint,
+  swap_pages_free bigint,
+  paging_pages_in bigint,
+  paging_pages_out bigint,
+  system_interrupts bigint,
+  system_context_switches bigint,
+  disk_read_ops bigint,
+  disk_write_ops bigint
+);
+
+CREATE INDEX idx_test_dstat on test_dstat(test);
+
+DROP TABLE IF EXISTS temp_test_dstat;
+CREATE UNLOGGED TABLE temp_test_dstat(
+  taken text,
+  cpu_perc_usr text,
+  cpu_perc_sys text,
+  cpu_perc_idle text,
+  cpu_perc_wait text,
+  cpu_perc_hiq text,
+  cpu_perc_siq text,
+  mem_used_bytes text,
+  mem_buff_bytes text,
+  mem_cache_bytes text,
+  mem_free_bytes text,
+  swap_pages_used text,
+  swap_pages_free text,
+  paging_pages_in text,
+  paging_pages_out text,
+  system_interrupts text,
+  system_context_switches text,
+  disk_read_ops text,
+  disk_write_ops text
 );
 
 --
@@ -110,5 +160,56 @@ SELECT hex_to_dec(split_part($1,'/',1)) * 16 * 1024 * 1024 * 255
     + hex_to_dec(split_part($1,'/',2));
 $$ language sql
 ;
+
+CREATE OR REPLACE FUNCTION convert_dstats(int)
+RETURNS void AS $$
+insert into test_dstat(
+  test,
+  taken,
+  cpu_perc_usr,
+  cpu_perc_sys,
+  cpu_perc_idle,
+  cpu_perc_wait,
+  cpu_perc_hiq,
+  cpu_perc_siq,
+  mem_used_bytes,
+  mem_buff_bytes,
+  mem_cache_bytes,
+  mem_free_bytes,
+  swap_pages_used,
+  swap_pages_free,
+  paging_pages_in,
+  paging_pages_out,
+  system_interrupts,
+  system_context_switches,
+  disk_read_ops,
+  disk_write_ops)
+select
+  $1,
+  -- FIXME: This is a terrible kludge, but it is convenient for now
+  to_timestamp(taken || ' ' || extract (year from current_timestamp), 'DD MM HH24 MI SS YYYY'),
+  cpu_perc_usr::numeric,
+  cpu_perc_sys::numeric,
+  cpu_perc_idle::numeric,
+  cpu_perc_wait::numeric,
+  cpu_perc_hiq::numeric,
+  cpu_perc_siq::numeric,
+  mem_used_bytes::numeric::bigint,
+  mem_buff_bytes::numeric::bigint,
+  mem_cache_bytes::numeric::bigint,
+  mem_free_bytes::numeric::bigint,
+  swap_pages_used::numeric::bigint,
+  swap_pages_free::numeric::bigint,
+  paging_pages_in::numeric::bigint,
+  paging_pages_out::numeric::bigint,
+  system_interrupts::numeric::bigint,
+  system_context_switches::numeric::bigint,
+  disk_read_ops::numeric::bigint,
+  disk_write_ops::numeric::bigint
+from
+  temp_test_dstat;
+  delete from temp_test_dstat;
+
+$$ language sql;
 
 COMMIT;
