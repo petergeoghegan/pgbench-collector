@@ -67,7 +67,7 @@ if __name__=='__main__':
 
     if sys.platform.startswith('linux'):
         if cmd=='dstat':
-            capture("dstat -tcmsgy --output dstat.out --disk-tps 10")
+            capture("dstat -Tcmsgy --output dstat.out --disk-tps 10")
         else:
             usage()
     else:

@@ -8,7 +8,7 @@ set xlabel "Time during test"
 set ylabel "size (MB)"
 set yrange [0:]
 set xdata time
-set timefmt "%d-%m %H:%M:%S"
+set timefmt "%s"
 set format x "%M:%S"
 plot "dstat.stat" using 1:($8/1e6) title "used" with lines, \
 "dstat.stat" using 1:($9/1e6) title "buff" with lines, \

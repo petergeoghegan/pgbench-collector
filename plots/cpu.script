@@ -9,7 +9,7 @@ set xlabel "Time during test"
 set ylabel "Percent"
 set yrange [0:]
 set xdata time
-set timefmt "%d-%m %H:%M:%S"
+set timefmt "%s"
 set format x "%M:%S"
 plot "dstat.stat" using 1:2 title "usr" w line linewidth 1 linecolor rgb "blue", \
 "dstat.stat" using 1:3 title "sys" with line linewidth 1 linecolor rgb "salmon", \

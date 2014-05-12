@@ -85,7 +85,7 @@ CREATE INDEX idx_test_dstat on test_dstat(test);
 
 DROP TABLE IF EXISTS temp_test_dstat;
 CREATE UNLOGGED TABLE temp_test_dstat(
-  taken text,
+  taken_since_epoch float,
   cpu_perc_usr text,
   cpu_perc_sys text,
   cpu_perc_idle text,
@@ -190,8 +190,7 @@ insert into test_dstat(
   disk_write_ops)
 select
   $1,
-  -- FIXME: This is a terrible kludge, but it is convenient for now
-  to_timestamp(taken || ' ' || extract (year from current_timestamp), 'DD MM HH24 MI SS YYYY'),
+  to_timestamp(taken_since_epoch),
   cpu_perc_usr::numeric,
   cpu_perc_sys::numeric,
   cpu_perc_idle::numeric,

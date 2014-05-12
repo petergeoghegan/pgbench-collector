@@ -8,7 +8,7 @@ set title "disk"
 set xlabel "Time during test"
 set ylabel "Disk Operations"
 set xdata time
-set timefmt "%d-%m %H:%M:%S"
+set timefmt "%s"
 set format x "%M:%S"
 plot "dstat.stat" using 1:18 title "disk reads" with linespoints linecolor rgb "blue", \
 "dstat.stat" using 1:19 title "disk writes" with linespoints linecolor rgb "orange"

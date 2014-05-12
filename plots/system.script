@@ -8,7 +8,7 @@ set xlabel "Time during test"
 set ylabel "Events"
 set yrange [0:]
 set xdata time
-set timefmt "%d-%m %H:%M:%S"
+set timefmt "%s"
 set format x "%M:%S"
 set style line 1 lc rgb '#8b1a0e' pt 1 ps 1 lt 1 lw 2
 set style line 2 lc rgb '#5e9c36' pt 6 ps 1 lt 1 lw 2
