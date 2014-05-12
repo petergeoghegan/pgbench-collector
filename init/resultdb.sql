@@ -3,8 +3,12 @@ BEGIN;
 DROP TABLE IF EXISTS testset CASCADE;
 CREATE TABLE testset(
   set serial PRIMARY KEY,
-  info text UNIQUE
-  );
+  info text UNIQUE not null,
+  testdb text not null,
+  testuser text not null,
+  testhost text not null,
+  testport text not null
+);
 
 DROP TABLE IF EXISTS tests CASCADE;
 CREATE TABLE tests(
@@ -25,7 +29,7 @@ CREATE TABLE tests(
   wal_written numeric,
   cleanup interval default null,
   rate_limit numeric default null
-  );
+);
 
 DROP TABLE IF EXISTS timing;
 -- Staging table, for loading in data from CSV

@@ -12,5 +12,5 @@ if [ -z "$SET" ] ; then
   exit 1
 fi
 
-$RESULTPSQL -c "INSERT INTO testset(info) VALUES('$SET');"
+$RESULTPSQL -c "INSERT INTO testset(info, testdb, testuser, testhost, testport) VALUES('$SET', '$TESTDB', '$TESTUSER', '$TESTHOST', '$TESTPORT');"
 $RESULTPSQL -c "SELECT * FROM testset ORDER BY set"
