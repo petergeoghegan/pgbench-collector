@@ -16,8 +16,8 @@ CREATE TABLE tests(
   set int NOT NULL REFERENCES testset(set) ON DELETE CASCADE,
   scale int,
   dbsize int8,
-  start_time timestamp default now(),
-  end_time timestamp default null,
+  start_time timestamptz default now(),
+  end_time timestamptz default null,
   tps decimal default 0,
   script text,
   clients int,
@@ -34,7 +34,7 @@ CREATE TABLE tests(
 DROP TABLE IF EXISTS timing;
 -- Staging table, for loading in data from CSV
 CREATE UNLOGGED TABLE timing(
-  ts timestamp,
+  ts timestamptz,
   filenum int,
   latency numeric(9,3),
   test int NOT NULL REFERENCES tests(test)
@@ -137,10 +137,8 @@ BEGIN
         r := r * 16 + digit;
         END LOOP;
     RETURN r;
-END
-;
-$$ LANGUAGE plpgsql IMMUTABLE
-;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
 
 --
 -- Process the output from pg_current_xlog_location() or
@@ -162,8 +160,7 @@ CREATE OR REPLACE FUNCTION wal_lsn (text)
 RETURNS numeric AS $$
 SELECT hex_to_dec(split_part($1,'/',1)) * 16 * 1024 * 1024 * 255
     + hex_to_dec(split_part($1,'/',2));
-$$ language sql
-;
+$$ language sql;
 
 CREATE OR REPLACE FUNCTION convert_dstats(int)
 RETURNS void AS $$
