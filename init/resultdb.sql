@@ -32,8 +32,7 @@ CREATE TABLE tests(
 );
 
 DROP TABLE IF EXISTS timing;
--- Staging table, for loading in data from CSV
-CREATE UNLOGGED TABLE timing(
+CREATE TABLE timing(
   ts timestamptz,
   filenum int,
   latency numeric(9,3),
@@ -84,7 +83,8 @@ CREATE TABLE test_dstat(
 CREATE INDEX idx_test_dstat on test_dstat(test);
 
 DROP TABLE IF EXISTS temp_test_dstat;
-CREATE UNLOGGED TABLE temp_test_dstat(
+CREATE TABLE temp_test_dstat(
+  test int REFERENCES tests(test) ON DELETE CASCADE,
   taken_since_epoch float,
   cpu_perc_usr text,
   cpu_perc_sys text,
@@ -207,8 +207,9 @@ select
   disk_read_ops::numeric::bigint,
   disk_write_ops::numeric::bigint
 from
-  temp_test_dstat;
-  delete from temp_test_dstat;
+  temp_test_dstat where test = $1;
+
+  delete from temp_test_dstat where test = $1;
 
 $$ language sql;
 

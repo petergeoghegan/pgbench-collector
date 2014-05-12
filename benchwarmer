@@ -213,25 +213,11 @@ if [ "$OSDATA" -eq "1" ]; then
   # process, but we must make sure to also kill the child processes (launched
   # via subprocess.Popen()) so they are not lingering forever.
   ../../kill_pg "${DSTAT}"
-  cat $BASEDIR/dstat.out | grep -E '^[0-9]' > $BASEDIR/dstat.stat
+  cat $BASEDIR/dstat.out | grep -E '^[0-9]' | sed "s/^/$TEST,/g" > $BASEDIR/dstat.stat
+  rm $BASEDIR/dstat.out
   $RESULTPSQL -c "copy temp_test_dstat from stdin with csv" < $BASEDIR/dstat.stat
   $RESULTPSQL -c "select convert_dstats('$TEST'::int)"
-  rm $BASEDIR/dstat.out
-  cd $BASEDIR
-  gnuplot $BASEDIR/plots/memory.script
-  gnuplot $BASEDIR/plots/disk.script
-  gnuplot $BASEDIR/plots/cpu.script
-  gnuplot $BASEDIR/plots/paging.script
-  gnuplot $BASEDIR/plots/swap.script
-  gnuplot $BASEDIR/plots/system.script
   rm $BASEDIR/dstat.stat
-  cd results/$TEST
-  mv $BASEDIR/memory.svg $BASEDIR/results/$TEST
-  mv $BASEDIR/disk.svg $BASEDIR/results/$TEST
-  mv $BASEDIR/cpu.svg $BASEDIR/results/$TEST
-  mv $BASEDIR/paging.svg $BASEDIR/results/$TEST
-  mv $BASEDIR/swap.svg $BASEDIR/results/$TEST
-  mv $BASEDIR/system.svg $BASEDIR/results/$TEST
 fi
 
 max_dirty=0
@@ -269,7 +255,7 @@ if [ "$SKIPINIT" -ne "1" ]; then
   VACUUMSTART=`$RESULTPSQL -A -t -c "SELECT now()"`
   $TESTPSQL -c "VACUUM VERBOSE"
   $TESTPSQL -c "CHECKPOINT"
-  $RESULTPSQL -q -c "UPDATE tests SET cleanup=now() - '$VACUUMSTART'::timestamp WHERE test=$TEST"
+  $RESULTPSQL -q -c "UPDATE tests SET cleanup=now() - '$VACUUMSTART'::timestamptz WHERE test=$TEST"
 fi
 
 # Save pgbench log
