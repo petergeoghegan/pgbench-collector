@@ -16,5 +16,5 @@ set xdata time
 set timefmt "%s"
 set format x "%M:%S"
 set xrange [min_time:max_time]
-plot "dstat.stat" using 1:18 title "disk reads" with linespoints linecolor rgb "blue", \
-"dstat.stat" using 1:19 title "disk writes" with linespoints linecolor rgb "orange"
+plot "dstat.stat" using 1:16 title "disk reads" with linespoints linecolor rgb "blue", \
+"dstat.stat" using 1:17 title "disk writes" with linespoints linecolor rgb "orange"

@@ -70,8 +70,6 @@ CREATE TABLE test_dstat(
   mem_buff_bytes bigint,
   mem_cache_bytes bigint,
   mem_free_bytes bigint,
-  swap_pages_used bigint,
-  swap_pages_free bigint,
   paging_pages_in bigint,
   paging_pages_out bigint,
   system_interrupts bigint,
@@ -96,8 +94,6 @@ CREATE TABLE temp_test_dstat(
   mem_buff_bytes text,
   mem_cache_bytes text,
   mem_free_bytes text,
-  swap_pages_used text,
-  swap_pages_free text,
   paging_pages_in text,
   paging_pages_out text,
   system_interrupts text,
@@ -105,6 +101,8 @@ CREATE TABLE temp_test_dstat(
   disk_read_ops text,
   disk_write_ops text
 );
+
+CREATE INDEX idx_temp_test_dstat on temp_test_dstat(test);
 
 --
 -- Convert hex value to a decimal one.  It's possible to do this using
@@ -177,8 +175,6 @@ insert into test_dstat(
   mem_buff_bytes,
   mem_cache_bytes,
   mem_free_bytes,
-  swap_pages_used,
-  swap_pages_free,
   paging_pages_in,
   paging_pages_out,
   system_interrupts,
@@ -198,8 +194,6 @@ select
   mem_buff_bytes::numeric::bigint,
   mem_cache_bytes::numeric::bigint,
   mem_free_bytes::numeric::bigint,
-  swap_pages_used::numeric::bigint,
-  swap_pages_free::numeric::bigint,
   paging_pages_in::numeric::bigint,
   paging_pages_out::numeric::bigint,
   system_interrupts::numeric::bigint,
