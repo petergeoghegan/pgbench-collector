@@ -1,8 +1,11 @@
 #!/bin/bash
 #
-# webreport.sh connects to the Results database and generates a web page
-# as index.htm that includes links to all the results in the database
-
+# webreport connects to the Results database and generates a web page as
+# index.htm that includes links to all the results in the database. It
+# generates images for the summary graphs, as well as for each test (the
+# generic html files for each test are not regenerated, though - those come
+# from benchwarmer, as does the pg_setting.txt file, and the test pgbench
+# summary file)
 
 source ./config
 OUTFILE="results/index.htm"
