@@ -219,7 +219,7 @@ cat templates/footer.html >> $OUTFILE
 export MAX_TPS=`$RESULTPSQL -A -t -c "with tps as(select extract(epoch from date_trunc('second', ts)) as sec, count(*) as sec_tps from timing where test = 2 group by date_trunc('second', ts) order by date_trunc('second', ts)) select max(sec_tps) * 1.15 from tps;"`
 export MAX_LATENCY=`$RESULTPSQL -A -t -c "select max(latency) from timing"`
 
-MAX_Y_FOR_DSTAT=$($RESULTPSQL -A -t -F' ' -c "select (max(greatest(mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, 10))/1e6) * 1.05 as mem, max(greatest(swap_pages_used, swap_pages_free, 10)) as swap, max(greatest(paging_pages_in, paging_pages_out, 10)) as paging, max(greatest(system_interrupts, system_context_switches, 10)) as system, max(greatest(disk_read_ops, disk_write_ops)) as disk from test_dstat")
+MAX_Y_FOR_DSTAT=$($RESULTPSQL -A -t -F' ' -c "select (max(greatest(mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, 10))/1e6) * 1.05 as mem, max(greatest(swap_pages_used, swap_pages_free, 10)) as swap, max(greatest(paging_pages_in, paging_pages_out, 10)) as paging, max(greatest(system_interrupts, system_context_switches, 10)) as system, max(greatest(disk_read_ops, disk_write_ops, 1)) + 1 as disk from test_dstat")
 
 export MAX_MEM=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $1}')
 export MAX_SWAP=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $2}')
