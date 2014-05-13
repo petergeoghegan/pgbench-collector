@@ -61,4 +61,7 @@ for SCALE in $SCALES; do
   done
 done
 
-./webreport
+# Generate a web report, unless the user prefers to skip that
+if [ "$SKIPREPORT" -ne "1" ]; then
+  ./webreport
+fi

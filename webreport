@@ -240,8 +240,6 @@ for TEST in $TESTS ; do
   $RESULTPSQL -A -t -F' ' -c "select extract(epoch from ts), latency from timing where test = '$TEST'" > latency.txt
   gnuplot $BASEDIR/plots/latency.script
 
-  mv $BASEDIR/tps.svg $BASEDIR/results/$TEST
-  mv $BASEDIR/latency.png $BASEDIR/results/$TEST
   rm tpsdata.txt
   rm latency.txt
 
@@ -252,6 +250,13 @@ for TEST in $TESTS ; do
   gnuplot $BASEDIR/plots/cpu.script
   gnuplot $BASEDIR/plots/paging.script
   gnuplot $BASEDIR/plots/system.script
+
+  mkdir -p "$BASEDIR/results/$TEST/"
+  cp $BASEDIR/templates/test-index.html $BASEDIR/results/$TEST/index.html
+  echo "<title>Set $SET, Test $TEST</title>" >> results/$TEST/index.html
+
+  mv $BASEDIR/tps.svg $BASEDIR/results/$TEST
+  mv $BASEDIR/latency.png $BASEDIR/results/$TEST
 
   mv $BASEDIR/memory.svg $BASEDIR/results/$TEST
   mv $BASEDIR/disk.svg $BASEDIR/results/$TEST

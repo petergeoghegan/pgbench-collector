@@ -14,10 +14,17 @@ TESTDIR="tests"
 # if you are not using the pgbench tables for your test
 SKIPINIT=0
 
-# Set TABBED to 1 to use Javascript for a multi-tabbed display format
+# SKIPREPORT should be set to 1 when html report generation at the end of each
+# set run is not required.  You can always directly run ./webreport some time
+# later, perhaps on an entirely different machine that only has access to the
+# results database.
+SKIPREPORT=0
+
+# Set TABBED to 0 to use traditional report format (not Javascript for a
+# multi-tabbed display)
 TABBED=1
 
-# Set OSDATA to 1 to collect OS data using vmstat and iostat
+# Set OSDATA to 1 to collect OS data using dstat
 OSDATA=1
 
 # Test/result database connection
