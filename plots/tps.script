@@ -14,5 +14,5 @@ set xdata time
 set timefmt "%s"
 set format x "%M:%S"
 set xrange [min_time:max_time]
-plot "tpsdata.txt" using 1:2:(1.0) smooth acsplines with lines title "Interpolated TPS (Weighted spline, weight 1)" linecolor rgb "orange", \
-"tpsdata.txt" using 1:2 with lines notitle linecolor rgb "red"
+plot "tpsdata.txt" using 1:2 with lines notitle linecolor rgb "orange", \
+"tpsdata.txt" using 1:2:(1.0) smooth acsplines with lines title "Interpolated TPS (Weighted spline, weight 1)" linewidth 3 linecolor rgb "red"
