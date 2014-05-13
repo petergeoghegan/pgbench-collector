@@ -231,7 +231,7 @@ for TEST in $TESTS ; do
   # Re-create CSV file for each test, to generate individual test graphs
 
   # Parse epoch that all graphs for this test should start and finish at
-  MIN_AND_MAX_TIME=$($RESULTPSQL -A -t -F' ' -c "with a as (select min(ts), max(ts) from timing where test = '$TEST'), b as (select min(taken), max(taken) from test_dstat where test = '$TEST') select extract(epoch from least(a.min, b.min)), extract(epoch from greatest(a.max, b.max)) from a, b;")
+  MIN_AND_MAX_TIME=$($RESULTPSQL -A -t -F' ' -c "select extract (epoch from min(ts)), extract (epoch from max(ts)) from timing where test = '$TEST';")
   export MIN_TIME=$(echo $MIN_AND_MAX_TIME | awk -F' ' '{print $1}')
   export MAX_TIME=$(echo $MIN_AND_MAX_TIME | awk -F' ' '{print $2}')
 
