@@ -20,6 +20,12 @@ SKIPINIT=0
 # results database.
 SKIPREPORT=0
 
+# TPS interpolated spline weight for per-test TPS breakdown.  It can sometimes
+# be useful to set this as low as 0.1, to better visualize highly noisey TPS
+# graphs.  (Note that this can be tweaked iteratively, by running ./webreport
+# repeatedly)
+TPS_WEIGHT=1.0
+
 # Set TABBED to 0 to use traditional report format (not Javascript for a
 # multi-tabbed display)
 TABBED=1

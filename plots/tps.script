@@ -9,10 +9,13 @@ set ylabel "TPS"
 max_tps=system("echo $MAX_TPS")
 min_time=system("echo $MIN_TIME")
 max_time=system("echo $MAX_TIME")
+weight_param=system("echo $TPS_WEIGHT")
+weightv=weight_param+0
+titlev=sprintf("Interpolated TPS (Weighted spline, weight %1.2f )", weightv)
 set yrange [0:max_tps]
 set xdata time
 set timefmt "%s"
 set format x "%M:%S"
 set xrange [min_time:max_time]
 plot "tpsdata.txt" using 1:2 with lines notitle linecolor rgb "orange", \
-"tpsdata.txt" using 1:2:(1.0) smooth acsplines with lines title "Interpolated TPS (Weighted spline, weight 1)" linewidth 3 linecolor rgb "red"
+"tpsdata.txt" using 1:2:(weightv) smooth acsplines with lines title titlev linewidth 3 linecolor rgb "red"
