@@ -6,10 +6,15 @@ set grid xtics ytics
 set title "Memory Usage"
 set xlabel "Time during test"
 set ylabel "size (MB)"
-set yrange [0:]
+# add 0 to cast
+max_mem=(system("echo $MAX_MEM"))
+set yrange [0:max_mem]
+min_time=system("echo $MIN_TIME")
+max_time=system("echo $MAX_TIME")
 set xdata time
 set timefmt "%s"
 set format x "%M:%S"
+set xrange [min_time:max_time]
 plot "dstat.stat" using 1:($8/1e6) title "used" with lines, \
 "dstat.stat" using 1:($9/1e6) title "buff" with lines, \
 "dstat.stat" using 1:($10/1e6) title "cach" with lines, \

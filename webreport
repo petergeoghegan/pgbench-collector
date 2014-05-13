@@ -215,14 +215,36 @@ done
 rm temp.txt
 cat templates/footer.html >> $OUTFILE
 
+# Get MAX_TPS and MAX_LATENCY, to make all graphs directly comparable across runs (GnuPlot looks for this)
+export MAX_TPS=`$RESULTPSQL -A -t -c "with tps as(select extract(epoch from date_trunc('second', ts)) as sec, count(*) as sec_tps from timing where test = 2 group by date_trunc('second', ts) order by date_trunc('second', ts)) select max(sec_tps) * 1.15 from tps;"`
+export MAX_LATENCY=`$RESULTPSQL -A -t -c "select max(latency) from timing"`
+
+MAX_Y_FOR_DSTAT=$($RESULTPSQL -A -t -F' ' -c "select (max(greatest(mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, 10))/1e6) * 1.05 as mem, max(greatest(swap_pages_used, swap_pages_free, 10)) as swap, max(greatest(paging_pages_in, paging_pages_out, 10)) as paging, max(greatest(system_interrupts, system_context_switches, 10)) as system, max(greatest(disk_read_ops, disk_write_ops)) as disk from test_dstat")
+
+export MAX_MEM=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $1}')
+export MAX_SWAP=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $2}')
+export MAX_PAGING=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $3}')
+export MAX_SYSTEM=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $4}')
+export MAX_DISK=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $5}')
+
 for TEST in $TESTS ; do
   # Re-create CSV file for each test, to generate individual test graphs
+
+  # Parse epoch that all graphs for this test should start and finish at
+  MIN_AND_MAX_TIME=$($RESULTPSQL -A -t -F' ' -c "with a as (select min(ts), max(ts) from timing where test = '$TEST'), b as (select min(taken), max(taken) from test_dstat where test = '$TEST') select extract(epoch from least(a.min, b.min)), extract(epoch from greatest(a.max, b.max)) from a, b;")
+  export MIN_TIME=$(echo $MIN_AND_MAX_TIME | awk -F' ' '{print $1}')
+  export MAX_TIME=$(echo $MIN_AND_MAX_TIME | awk -F' ' '{print $2}')
 
   $RESULTPSQL -A -t -F' ' -c "select extract(epoch from date_trunc('second', ts)), count(*) from timing where test = '$TEST' group by date_trunc('second', ts) order by date_trunc('second', ts)" > tpsdata.txt
   gnuplot $BASEDIR/plots/tps.script
 
   $RESULTPSQL -A -t -F' ' -c "select extract(epoch from ts), latency from timing where test = '$TEST'" > latency.txt
   gnuplot $BASEDIR/plots/latency.script
+
+  mv $BASEDIR/tps.svg $BASEDIR/results/$TEST
+  mv $BASEDIR/latency.png $BASEDIR/results/$TEST
+  rm tpsdata.txt
+  rm latency.txt
 
   $RESULTPSQL -t -A -F"," -c "select extract (epoch from taken), cpu_perc_usr, cpu_perc_sys, cpu_perc_idle, cpu_perc_wait, cpu_perc_hiq, cpu_perc_siq, mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, swap_pages_used, swap_pages_free, paging_pages_in, paging_pages_out, system_interrupts, system_context_switches, disk_read_ops, disk_write_ops from test_dstat where test = '$TEST' order by dstatid asc" > $BASEDIR/dstat.stat
 
@@ -233,17 +255,12 @@ for TEST in $TESTS ; do
   gnuplot $BASEDIR/plots/swap.script
   gnuplot $BASEDIR/plots/system.script
 
-  mv $BASEDIR/tps.svg $BASEDIR/results/$TEST
-  mv $BASEDIR/latency.png $BASEDIR/results/$TEST
   mv $BASEDIR/memory.svg $BASEDIR/results/$TEST
   mv $BASEDIR/disk.svg $BASEDIR/results/$TEST
   mv $BASEDIR/cpu.svg $BASEDIR/results/$TEST
   mv $BASEDIR/paging.svg $BASEDIR/results/$TEST
   mv $BASEDIR/swap.svg $BASEDIR/results/$TEST
   mv $BASEDIR/system.svg $BASEDIR/results/$TEST
-
-  rm tpsdata.txt
-  rm latency.txt
 done
 
 # Delete last remaining CSV temp stat file

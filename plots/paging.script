@@ -6,9 +6,13 @@ set output "paging.svg"
 set title "Page Statistics"
 set xlabel "Time during test"
 set ylabel "Pages"
-set yrange [0:]
+min_time=system("echo $MIN_TIME")
+max_time=system("echo $MAX_TIME")
+max_paging=system("echo $MAX_PAGING")
+set yrange [0:max_paging]
 set xdata time
 set timefmt "%s"
 set format x "%M:%S"
+set xrange [min_time:max_time]
 plot "dstat.stat" using 1:14 title "Page In" with lines, \
 "dstat.stat" using 1:15 title "Page Out" with lines

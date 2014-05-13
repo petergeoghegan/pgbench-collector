@@ -7,9 +7,13 @@ set grid xtics ytics
 set title "Swap Statistics"
 set xlabel "Time during test"
 set ylabel "Pages"
-set yrange [0:]
+min_time=system("echo $MIN_TIME")
+max_time=system("echo $MAX_TIME")
+max_swap=system("echo $MAX_SWAP")
+set yrange [0:max_swap]
 set xdata time
 set timefmt "%s"
 set format x "%M:%S"
+set xrange [min_time:max_time]
 plot "dstat.stat" using 1:12 title "Pages Used" with lines, \
 "dstat.stat" using 1:13 title "Pages Free" with lines

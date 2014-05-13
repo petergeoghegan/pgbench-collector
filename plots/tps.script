@@ -6,9 +6,13 @@ set grid xtics mxtics ytics mytics
 set xlabel "Time during test"
 set ylabel "TPS"
 # A yrange min of 0, to avoid interpolation line changing range
-set yrange [0:]
+max_tps=system("echo $MAX_TPS")
+min_time=system("echo $MIN_TIME")
+max_time=system("echo $MAX_TIME")
+set yrange [0:max_tps]
 set xdata time
 set timefmt "%s"
 set format x "%M:%S"
+set xrange [min_time:max_time]
 plot "tpsdata.txt" using 1:2:(1.0) smooth acsplines with lines title "Interpolated TPS (Weighted spline, weight 1)" linecolor rgb "orange", \
 "tpsdata.txt" using 1:2 with lines notitle linecolor rgb "red"
