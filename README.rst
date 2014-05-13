@@ -92,8 +92,10 @@ Results
 * The results directory will also include its own index HTML file (named
   index.html) that shows summary information and plots for all the tests.
 
-* If you manually adjust the test result database, you can
-  then manually regenerate the summary graphs by running::
+* If you manually adjust the test result database, you can then manually
+  regenerate both the summary graphs, and individual test graphs (although not
+  drill-downed, per-test html files, pg_settings.txt files or test summary
+  files) by running::
 
     ./webreport
 

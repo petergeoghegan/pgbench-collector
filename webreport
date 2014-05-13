@@ -195,6 +195,7 @@ for SET in $SETS ; do
 
   echo  "'scaling-$SET.txt' using 1:3 axis x1y1 title '$DESCR' with linespoints $DELIM" >> multi-scale.plot
   echo  "'clients-$SET.txt' using 1:2 axis x1y1 title '$DESCR' with linespoints $DELIM" >> multi-client.plot
+
 done
 
 gnuplot multi-scale.plot 2>&1 | grep -v "Warning: empty"
@@ -213,7 +214,12 @@ cat templates/footer.html >> $OUTFILE
 
 for TEST in $TESTS ; do
   # Re-create CSV file for each test, to generate individual test graphs
-  cd $BASEDIR
+
+  $RESULTPSQL -A -t -F' ' -c "select extract(epoch from date_trunc('second', ts)), count(*) from timing where test = '$TEST' group by date_trunc('second', ts) order by date_trunc('second', ts)" > tpsdata.txt
+  gnuplot $BASEDIR/plots/tps.script
+
+  $RESULTPSQL -A -t -F' ' -c "select extract(epoch from ts), latency from timing where test = '$TEST'" > latency.txt
+  gnuplot $BASEDIR/plots/latency.script
 
   $RESULTPSQL -t -A -F"," -c "select extract (epoch from taken), cpu_perc_usr, cpu_perc_sys, cpu_perc_idle, cpu_perc_wait, cpu_perc_hiq, cpu_perc_siq, mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, swap_pages_used, swap_pages_free, paging_pages_in, paging_pages_out, system_interrupts, system_context_switches, disk_read_ops, disk_write_ops from test_dstat where test = '$TEST' order by dstatid asc" > $BASEDIR/dstat.stat
 
@@ -224,12 +230,17 @@ for TEST in $TESTS ; do
   gnuplot $BASEDIR/plots/swap.script
   gnuplot $BASEDIR/plots/system.script
 
+  mv $BASEDIR/tps.svg $BASEDIR/results/$TEST
+  mv $BASEDIR/latency.png $BASEDIR/results/$TEST
   mv $BASEDIR/memory.svg $BASEDIR/results/$TEST
   mv $BASEDIR/disk.svg $BASEDIR/results/$TEST
   mv $BASEDIR/cpu.svg $BASEDIR/results/$TEST
   mv $BASEDIR/paging.svg $BASEDIR/results/$TEST
   mv $BASEDIR/swap.svg $BASEDIR/results/$TEST
   mv $BASEDIR/system.svg $BASEDIR/results/$TEST
+
+  rm tpsdata.txt
+  rm latency.txt
 done
 
 # Delete last remaining CSV temp stat file

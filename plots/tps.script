@@ -9,5 +9,6 @@ set ylabel "TPS"
 set yrange [0:]
 set xdata time
 set timefmt "%s"
+set format x "%M:%S"
 plot "tpsdata.txt" using 1:2:(1.0) smooth acsplines with lines title "Interpolated TPS (Weighted spline, weight 1)" linecolor rgb "orange", \
 "tpsdata.txt" using 1:2 with lines notitle linecolor rgb "red"

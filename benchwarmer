@@ -285,23 +285,13 @@ else
   # Import timestamp information
   $BASEDIR/log-to-csv $TEST < pgbench.log > timing.csv
   $RESULTPSQL -c "copy timing from stdin with csv" < timing.csv
-
-  # Plot result graphs
-  $RESULTPSQL -A -t -F' ' -c "select extract(epoch from date_trunc('second',ts)),count(*) from timing where test=$TEST group by date_trunc('second',ts) order by date_trunc('second',ts)" > tpsdata.txt
-  gnuplot $BASEDIR/plots/tps.script
-
-  $RESULTPSQL -A -t -F' ' -c "select extract(epoch from ts),latency from timing where test=$TEST" > latency.txt
-  gnuplot $BASEDIR/plots/latency.script
+  # (This may be used within webreport)
 
   $RESULTPSQL -q -c "update tests set avg_latency=(select avg(latency) from timing where tests.test=timing.test), max_latency=(select max(latency)from timing where tests.test=timing.test), percentile_90_latency=(select latency from timing where tests.test=timing.test order by latency offset (round(0.90*trans)) limit 1) where tests.test='$TEST'"
 fi
 
 cp $BASEDIR/templates/test-index.html index.html
 echo "<title>Set $SET, Test $TEST, clients: $CLIENTS</title>" >> index.html
-
-# Now that we're done plotting and computing stats, wipe the low-level
-# data we don't need anymore
-$RESULTPSQL -q -c "truncate table timing"
 
 # Save some configuration information about the server
 CLIENTHOST=`hostname`
@@ -354,5 +344,3 @@ mount >> $SETTINGS
 rm pgbench_log.${P}*
 rm pgbench.log
 rm timing.csv
-rm tpsdata.txt
-rm latency.txt
