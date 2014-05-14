@@ -47,7 +47,10 @@ echo "<img src=\"clients-sets.svg\"><p>" >> $OUTFILE
 
 # Loop over all the active test sets
 SETS=`$RESULTPSQL -A -t -c "select set from tests group by set order by set"`
-TESTS=`$RESULTPSQL -A -t -c "select test from tests order by test"`
+# This ought to always be in an order consistent with the ordering of test
+# number when every run occurs serially (i.e. the historic pgbench-tools
+# behavior; we have to worry about parallelism):
+TESTS=`$RESULTPSQL -A -t -c "select test from tests order by set, scale, clients, rate_limit"`
 
 # Build table of contents
 echo '<ul>' >> $OUTFILE
@@ -252,12 +255,6 @@ for TEST in $TESTS ; do
 
   $RESULTPSQL -t -A -F"," -c "select extract (epoch from taken), cpu_perc_usr, cpu_perc_sys, cpu_perc_idle, cpu_perc_wait, cpu_perc_hiq, cpu_perc_siq, mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, paging_pages_in, paging_pages_out, system_interrupts, system_context_switches, disk_read_ops, disk_write_ops from test_dstat where test = '$TEST' order by dstatid asc" > $BASEDIR/dstat.stat
 
-  gnuplot $BASEDIR/plots/memory.script
-  gnuplot $BASEDIR/plots/disk.script
-  gnuplot $BASEDIR/plots/cpu.script
-  gnuplot $BASEDIR/plots/paging.script
-  gnuplot $BASEDIR/plots/system.script
-
   mkdir -p "$BASEDIR/results/$TEST/"
   cp $BASEDIR/templates/test-index.html $BASEDIR/results/$TEST/index.html
   echo "<title>Set $SET, Test $TEST</title>" >> results/$TEST/index.html
@@ -266,11 +263,19 @@ for TEST in $TESTS ; do
   mv $BASEDIR/tps.svg $BASEDIR/results/$TEST
   mv $BASEDIR/latency.png $BASEDIR/results/$TEST
 
-  mv $BASEDIR/memory.svg $BASEDIR/results/$TEST
-  mv $BASEDIR/disk.svg $BASEDIR/results/$TEST
-  mv $BASEDIR/cpu.svg $BASEDIR/results/$TEST
-  mv $BASEDIR/paging.svg $BASEDIR/results/$TEST
-  mv $BASEDIR/system.svg $BASEDIR/results/$TEST
+  if [ "$OSDATA" -eq "1" ]; then
+    gnuplot $BASEDIR/plots/memory.script
+    gnuplot $BASEDIR/plots/disk.script
+    gnuplot $BASEDIR/plots/cpu.script
+    gnuplot $BASEDIR/plots/paging.script
+    gnuplot $BASEDIR/plots/system.script
+
+    mv $BASEDIR/memory.svg $BASEDIR/results/$TEST
+    mv $BASEDIR/disk.svg $BASEDIR/results/$TEST
+    mv $BASEDIR/cpu.svg $BASEDIR/results/$TEST
+    mv $BASEDIR/paging.svg $BASEDIR/results/$TEST
+    mv $BASEDIR/system.svg $BASEDIR/results/$TEST
+  fi
 done
 
 # Delete last remaining CSV temp stat file

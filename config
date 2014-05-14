@@ -1,8 +1,6 @@
-#
 # Basic setup options.  If you are running as the postgres user and
 # are using PostgreSQL 8.4 or later, you normally don't need to
 # change any of these.
-#
 
 BASEDIR=`pwd`
 PGBENCHBIN=`which pgbench`
@@ -30,7 +28,8 @@ TPS_WEIGHT=1.0
 # multi-tabbed display)
 TABBED=1
 
-# Set OSDATA to 1 to collect OS data using dstat
+# Set OSDATA to 1 to collect OS data using dstat.  There is a tacit assumption
+# that this is set consistently across test sets (i.e. for an entire benchmark)
 OSDATA=1
 
 # Test/result database connection
@@ -51,12 +50,10 @@ RESULTDB=results
 # Set this to a number only when using pgbench 9.0 or later.  This will set
 # the number of worker threads up to this maximum for each client count
 MAX_WORKERS=`nproc`
-# Blank setting, typically used with earlier pgbench versions
-#MAX_WORKERS=""
 
 SCRIPT="tpc-b.sql"
 SCALES="10"
-SETCLIENTS="16"
+SETCLIENTS="8 16 32"
 SETTIMES=3
 
 # RUNTIME is in seconds.  If it is specified, then TOTTRANS is ignored.
