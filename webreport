@@ -161,6 +161,11 @@ ff
   cp $OUTFILE temp.txt
   cat temp.txt | grep -v " rows*)" > $OUTFILE
   echo "</div>" >> $OUTFILE
+
+  # Store settings in per-set directory
+  mkdir "$BASEDIR/results/sets/$SET" -p
+  $RESULTPSQL -A -t -c "SELECT settings from testset where set = '$SET'" -d results > pg_settings.txt
+  mv pg_settings.txt "$BASEDIR/results/sets/$SET/"
 done
 
 # Plot set comparison
@@ -256,6 +261,7 @@ for TEST in $TESTS ; do
   mkdir -p "$BASEDIR/results/$TEST/"
   cp $BASEDIR/templates/test-index.html $BASEDIR/results/$TEST/index.html
   echo "<title>Set $SET, Test $TEST</title>" >> results/$TEST/index.html
+  echo "<a href="../sets/$SET/pg_settings.txt">Server settings</a> <br>" >> results/$TEST/index.html
 
   mv $BASEDIR/tps.svg $BASEDIR/results/$TEST
   mv $BASEDIR/latency.png $BASEDIR/results/$TEST

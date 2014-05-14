@@ -7,7 +7,8 @@ CREATE TABLE testset(
   testdb text not null,
   testuser text not null,
   testhost text not null,
-  testport text not null
+  testport int not null,
+  settings text
 );
 
 DROP TABLE IF EXISTS tests CASCADE;

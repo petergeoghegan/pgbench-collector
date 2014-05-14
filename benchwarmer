@@ -318,7 +318,13 @@ fi
 
 mount >> $SETTINGS
 
+# Finally, store settings file within database
+CONTENTS=`cat $SETTINGS`
+$RESULTPSQL -q -c "update testset set settings=\$settings\$$CONTENTS\$settings\$ where set = '$SET'"
+
 # Remove temporary files
 rm pgbench_log.${P}*
 rm pgbench.log
 rm timing.csv
+rm results.txt
+rm $SETTINGS
