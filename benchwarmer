@@ -194,6 +194,7 @@ if [ "$OSDATA" -eq "1" ]; then
   # process, but we must make sure to also kill the child processes (launched
   # via subprocess.Popen()) so they are not lingering forever.
   $BASEDIR/kill_pg "${DSTAT}"
+  # Insert test into CSV representation, for the benefit of COPY
   cat $BASEDIR/dstat.out | grep -E '^[0-9]' | sed "s/^/$TEST,/g" > $BASEDIR/dstat.stat
   rm $BASEDIR/dstat.out
   $RESULTPSQL -c "copy temp_test_dstat from stdin with csv" < $BASEDIR/dstat.stat
