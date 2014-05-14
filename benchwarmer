@@ -163,7 +163,7 @@ fi
 
 # Create the tests record
 DBSIZE=`$TESTPSQL -A -t -c "select pg_database_size('$TESTDB')"`
-$RESULTPSQL -q -c "insert into tests (script,clients,workers,set,scale,dbsize,rate_limit) values('$SCRIPT','$CLIENTS','$NUM_WORKERS','$SET','$SCALE','$DBSIZE',$RATE)"
+$RESULTPSQL -q -c "insert into tests (script, clients, workers, set, scale, dbsize, rate_limit) values('$SCRIPT','$CLIENTS','$NUM_WORKERS','$SET','$SCALE','$DBSIZE',$RATE)"
 TEST=`$RESULTPSQL -A -t -c "select max(test) from tests where set = '$SET'"`
 if [ "$?" -ne "0" ]; then
   echo ERROR  Can\'t read from tests table.  Was the test data installed?
@@ -202,7 +202,7 @@ if [ "$OSDATA" -eq "1" ]; then
   # The PIDs we have will be the process ID of the Python timed-os-stats
   # process, but we must make sure to also kill the child processes (launched
   # via subprocess.Popen()) so they are not lingering forever.
-  ../../kill_pg "${DSTAT}"
+  $BASEDIR/kill_pg "${DSTAT}"
   cat $BASEDIR/dstat.out | grep -E '^[0-9]' | sed "s/^/$TEST,/g" > $BASEDIR/dstat.stat
   rm $BASEDIR/dstat.out
   $RESULTPSQL -c "copy temp_test_dstat from stdin with csv" < $BASEDIR/dstat.stat
