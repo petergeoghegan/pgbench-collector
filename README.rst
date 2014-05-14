@@ -69,7 +69,14 @@ Running tests
 
     ./runset
 
-  In order to execute all the tests
+  In order to execute all the tests. Sometimes, it can be useful to specify the
+  set number of the set being run.  This allows benchmarks of multiple systems
+  to be run in parallel (with a single results database)::
+
+
+    ./runset 5
+
+   (An individual test set's set number is determined at the ./newset stage).
 
 Results
 =======

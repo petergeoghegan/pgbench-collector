@@ -54,15 +54,15 @@ MAX_WORKERS=`nproc`
 # Blank setting, typically used with earlier pgbench versions
 #MAX_WORKERS=""
 
-SCRIPT="select.sql"
-SCALES="1"
-SETCLIENTS="10"
+SCRIPT="tpc-b.sql"
+SCALES="10"
+SETCLIENTS="16"
 SETTIMES=3
 
 # RUNTIME is in seconds.  If it is specified, then TOTTRANS is ignored.
 # Setting a time instead of a transaction account is only available
 # in 8.4 and later.
-RUNTIME=15
+RUNTIME=45
 TOTTRANS=""
 
 # A transaction count may be used instead

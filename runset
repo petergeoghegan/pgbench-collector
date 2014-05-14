@@ -2,6 +2,13 @@
 
 . ./config
 
+# Clients
+if [ ! -z "$1" ]; then
+  export CURRENT_SET="$1"
+else
+  export CURRENT_SET=-1
+fi
+
 # Confirm we have a useful pgbench to run
 if [ ! -f $PGBENCHBIN ]; then
   echo ERROR:  cannot find pgbench binary $PGBENCHBIN , aborting
@@ -9,6 +16,7 @@ if [ ! -f $PGBENCHBIN ]; then
 fi
 
 TESTPSQL="psql -h $TESTHOST -U $TESTUSER -p $TESTPORT -d $TESTDB"
+RESULTPSQL="psql -h $RESULTHOST -U $RESULTUSER -p $RESULTPORT -d $RESULTDB"
 
 # See if this database has all the standard pgbench tables in it
 PGCOUNT=`$TESTPSQL -A -t -c "SELECT count(*)  FROM pg_stat_user_tables WHERE relname IN ('pgbench_history','pgbench_tellers','pgbench_accounts','pgbench_branches')"`
@@ -22,6 +30,24 @@ else
     PGBENCH_TABLES=1
   else
     PGBENCH_TABLES=0
+  fi
+fi
+
+# Find current test set
+if [ "$CURRENT_SET" -ne -1 ]; then
+  EXISTS=`$RESULTPSQL -A -t -c "select exists(select 1 from testset where set = '$CURRENT_SET')"`
+  if [ "$EXISTS" == "f" ]; then
+    echo ERROR: Test set $CURRENT_SET does not exist
+    exit
+  fi
+else
+  export CURRENT_SET=`$RESULTPSQL -A -t -c "select max(set) from testset"`
+  if [ "$?" -ne "0" ]; then
+    echo ERROR:  Attempt to determine test set failed
+    # TODO Create a fake first set if this happens?  Right now,
+    # the likely case is that the test DDL was never added, which
+    # makes that sort of correction attempt unlikely to be useful
+    exit
   fi
 fi
 
@@ -48,11 +74,11 @@ for SCALE in $SCALES; do
   for (( t=1; t<=$SETTIMES; t++ )); do
     for c in $SETCLIENTS; do
       if [ -z "$SETRATES" ] ; then
-        echo Run set \#$t of $SETTIMES with $c clients scale=$SCALE
+        echo Run set $SET, iteration \#$t of $SETTIMES with $c clients scale=$SCALE
         ./benchwarmer $c
       else
         for r in $SETRATES; do
-          echo Run set \#$t of $SETTIMES with $c clients scale=$SCALE rate=$r
+          echo Run set $SET, iteration \#$t of $SETTIMES with $c clients scale=$SCALE rate=$r
           ./benchwarmer $c $r
         done
       fi

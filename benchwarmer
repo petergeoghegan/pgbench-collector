@@ -119,15 +119,8 @@ if [ ! -f $PGBENCHBIN ]; then
   exit
 fi
 
-# Find current test set
-SET=`$RESULTPSQL -A -t -c "select max(set) from testset"`
-if [ "$?" -ne "0" ]; then
-  echo ERROR:  Attempt to determine test set failed
-  # TODO Create a fake first set if this happens?  Right now,
-  # the likely case is that the test DDL was never added, which
-  # makes that sort of correction attempt unlikely to be useful
-  exit
-fi
+# Use CURRENT_SET environment variable, typically set by runset
+SET=$CURRENT_SET
 
 # Cleanup pgbench tables, unless we've been told to skip that
 if [ "$SKIPINIT" -ne "1" ]; then
@@ -148,7 +141,7 @@ if [ "$SKIPINIT" -ne "1" ]; then
   CLEANED=`$RESULTPSQL -A -t -c "SELECT EXISTS(SELECT 1 FROM tests WHERE cleanup IS NOT NULL AND ((now() - end_time) + cleanup) < '100 seconds'::interval ORDER BY test DESC LIMIT 1)"`
   if [ "$CLEANED" = 'f' ] ; then
     # VACUUM VERBOSE -- additional verbosity gives at least some indication of progress
-    $TESTPSQL -c "VACUUM VERBOSE"
+    $TESTPSQL -c "VACUUM"
   else
     echo "Skipping vacuum, it was recently ran by the last test"
   fi
@@ -199,7 +192,6 @@ if [ "$OSDATA" -eq "1" ]; then
 fi
 
 # Run the main pgbench test
-cd results/$TEST
 echo Script $SCRIPT executing for $CLIENTS concurrent users... 1>&2
 $PGBENCHBIN -f $BASEDIR/$TESTDIR/$SCRIPT -s $SCALE -l -n $TESTLEN -U $TESTUSER -h $TESTHOST -p $TESTPORT -c $CLIENTS $WORKERS $RATEOPT $TESTDB > results.txt &
 P=$!
