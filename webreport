@@ -180,6 +180,7 @@ set mytics
 set grid xtics ytics mytics
 set xlabel "Clients"
 set ylabel "TPS"
+set yrange [0:]
 plot \
 ENDING
 
@@ -191,6 +192,7 @@ set mytics
 set grid xtics ytics mytics
 set xlabel "Scaling factor"
 set ylabel "TPS"
+set yrange [0:]
 plot \
 ENDING
 

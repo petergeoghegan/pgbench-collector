@@ -13,6 +13,7 @@ set yrange [0:max_paging]
 set xdata time
 set timefmt "%s"
 set format x "%M:%S"
+set lmargin at screen 0.15;
 set xrange [min_time:max_time]
 plot "dstat.stat" using 1:12 title "Page In" with lines, \
 "dstat.stat" using 1:13 title "Page Out" with lines

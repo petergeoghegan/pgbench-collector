@@ -17,5 +17,6 @@ set xdata time
 set timefmt "%s"
 set format x "%M:%S"
 set xrange [min_time:max_time]
+set lmargin at screen 0.15;
 plot "tpsdata.txt" using 1:2 with lines notitle linecolor rgb "orange", \
 "tpsdata.txt" using 1:2:(weightv) smooth acsplines with lines title titlev linewidth 3 linecolor rgb "red"

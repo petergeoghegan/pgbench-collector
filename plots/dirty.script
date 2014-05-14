@@ -8,4 +8,5 @@ set ylabel "Dirty Memory kB"
 set yrange [0:]
 set xdata time
 set timefmt "%s"
+set lmargin at screen 0.15;
 plot "dirtydata.txt" using 1:2 with lines

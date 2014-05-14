@@ -12,6 +12,7 @@ set ytics nomirror
 set y2tics
 # y2tics sets the increment between ticks, not their number
 set y2tics autofreq
+set lmargin at screen 0.15;
 
 plot \
   "scaling.txt" using 1:3 axis x1y1 title 'TPS' with linespoints,\

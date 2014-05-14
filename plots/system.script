@@ -16,6 +16,7 @@ set format x "%M:%S"
 set xrange [min_time:max_time]
 set style line 1 lc rgb '#8b1a0e' pt 1 ps 1 lt 1 lw 2
 set style line 2 lc rgb '#5e9c36' pt 6 ps 1 lt 1 lw 2
+set lmargin at screen 0.15;
 
 plot "dstat.stat" using 1:14 ls 1 title "Interrupts" with lines, \
 "dstat.stat" using 1:15 ls 2 title "Context Switches" with lines
