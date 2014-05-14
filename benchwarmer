@@ -25,7 +25,7 @@ fi
 # a set of environment variables, probably for use inserting stats into
 # the results database.
 function get_bgwriter {
-  BGW=`$TESTPSQL -A -t -F" " -c "select checkpoints_timed,checkpoints_req,buffers_checkpoint,buffers_clean,maxwritten_clean,buffers_backend,buffers_alloc, buffers_backend_fsync from pg_stat_bgwriter"`
+  BGW=`$TESTPSQL -A -t -F" " -c "select checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync from pg_stat_bgwriter"`
   set -- $BGW
   checkpoints_timed=$1
   checkpoints_req=$2
@@ -91,26 +91,17 @@ echo Storing results using:  $RESULTPSQL
 # See if this database has all the standard pgbench tables in it
 PGCOUNT=`$TESTPSQL -A -t -c "SELECT count(*)  FROM pg_stat_user_tables WHERE relname IN ('pgbench_history','pgbench_tellers','pgbench_accounts','pgbench_branches')"`
 if [ "$PGCOUNT" -eq 4 ] ; then
-  TABLEPREFIX="pgbench_"
   PGBENCH_TABLES=1
-  echo Found standard pgbench tables with prefix=$TABLEPREFIX
+  echo Found standard pgbench tables
 else
-  TABLEPREFIX=""
-  PGCOUNT=`$TESTPSQL -A -t -c "SELECT count(*)  FROM pg_stat_user_tables WHERE relname IN ('history','tellers','accounts','branches')"`
-  echo "count=$PGCOUNT"
-  if [ "$PGCOUNT" -eq 4 ] ; then
-    echo Found standard pgbench tables with prefix=$TABLEPREFIX
-    PGBENCH_TABLES=1
-  else
     echo Did not find standard pgbench tables
     PGBENCH_TABLES=0
-  fi
 fi
 
 # Determine database scale
 SCALE=0
 if [ "$PGBENCH_TABLES" -eq "1" ] ; then
-  SCALE=`$TESTPSQL -A -t -c "select count(*) from ${TABLEPREFIX}branches"`
+  SCALE=`$TESTPSQL -A -t -c "select count(*) from pgbench_branches"`
 fi
 
 # Confirm we have a useful pgbench to run
@@ -126,7 +117,7 @@ SET=$CURRENT_SET
 if [ "$SKIPINIT" -ne "1" ]; then
   echo Cleaning up database $TESTDB
   if [ "$PGBENCH_TABLES" -eq "1" ] ; then
-    $TESTPSQL -c "truncate table ${TABLEPREFIX}history"
+    $TESTPSQL -c "truncate table pgbench_history"
   fi
 
   # If the previous test ran recently and it did a cleanup, we should
@@ -206,7 +197,7 @@ if [ "$OSDATA" -eq "1" ]; then
   cat $BASEDIR/dstat.out | grep -E '^[0-9]' | sed "s/^/$TEST,/g" > $BASEDIR/dstat.stat
   rm $BASEDIR/dstat.out
   $RESULTPSQL -c "copy temp_test_dstat from stdin with csv" < $BASEDIR/dstat.stat
-  $RESULTPSQL -c "select convert_dstats('$TEST'::int)"
+  $RESULTPSQL -c "select convert_dstats('$TEST'::int)" &> /dev/null
   rm $BASEDIR/dstat.stat
 fi
 
@@ -240,7 +231,7 @@ cat results.txt
 if [ "$SKIPINIT" -ne "1" ]; then
   echo Cleaning up database $TESTDB
   if [ "$PGBENCH_TABLES" -eq "1" ] ; then
-    $TESTPSQL -c "truncate table ${TABLEPREFIX}history"
+    $TESTPSQL -c "truncate table pgbench_history"
   fi
   VACUUMSTART=`$RESULTPSQL -A -t -c "SELECT now()"`
   $TESTPSQL -c "VACUUM"

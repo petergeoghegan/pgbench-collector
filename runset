@@ -19,18 +19,11 @@ TESTPSQL="psql -h $TESTHOST -U $TESTUSER -p $TESTPORT -d $TESTDB"
 RESULTPSQL="psql -h $RESULTHOST -U $RESULTUSER -p $RESULTPORT -d $RESULTDB"
 
 # See if this database has all the standard pgbench tables in it
-PGCOUNT=`$TESTPSQL -A -t -c "SELECT count(*)  FROM pg_stat_user_tables WHERE relname IN ('pgbench_history','pgbench_tellers','pgbench_accounts','pgbench_branches')"`
+PGCOUNT=`$TESTPSQL -A -t -c "SELECT count(*) FROM pg_stat_user_tables WHERE relname IN ('pgbench_history', 'pgbench_tellers', 'pgbench_accounts', 'pgbench_branches')"`
 if [ "$PGCOUNT" -eq 4 ] ; then
-  TABLEPREFIX="pgbench_"
   PGBENCH_TABLES=1
 else
-  TABLEPREFIX=""
-  PGCOUNT=`$TESTPSQL -A -t -c "SELECT count(*)  FROM pg_stat_user_tables WHERE relname IN ('history','tellers','accounts','branches')"`
-  if [ "$PGCOUNT" -eq 4 ] ; then
-    PGBENCH_TABLES=1
-  else
-    PGBENCH_TABLES=0
-  fi
+  PGBENCH_TABLES=0
 fi
 
 # Find current test set
@@ -60,7 +53,7 @@ for SCALE in $SCALES; do
   if [ "$SKIPINIT" -ne "1" ]; then
     if [ "$PGBENCH_TABLES" -eq "1" ] ; then
       echo Removing old pgbench tables
-      $TESTPSQL -c "drop table ${TABLEPREFIX}accounts; drop table ${TABLEPREFIX}branches; drop table ${TABLEPREFIX}tellers; drop table ${TABLEPREFIX}history;"
+      $TESTPSQL -c "drop table pgbench_accounts; drop table pgbench_branches; drop table pgbench_tellers; drop table pgbench_history;"
     fi
     # VACUUM any other, non-standard tables that might exist within the "pgbench" database
     $TESTPSQL -c "VACUUM"
