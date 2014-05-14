@@ -164,7 +164,7 @@ fi
 # Create the tests record
 DBSIZE=`$TESTPSQL -A -t -c "select pg_database_size('$TESTDB')"`
 $RESULTPSQL -q -c "insert into tests (script,clients,workers,set,scale,dbsize,rate_limit) values('$SCRIPT','$CLIENTS','$NUM_WORKERS','$SET','$SCALE','$DBSIZE',$RATE)"
-TEST=`$RESULTPSQL -A -t -c "select max(test) from tests"`
+TEST=`$RESULTPSQL -A -t -c "select max(test) from tests where set = '$SET'"`
 if [ "$?" -ne "0" ]; then
   echo ERROR  Can\'t read from tests table.  Was the test data installed?
   exit
@@ -243,7 +243,7 @@ if [ "$SKIPINIT" -ne "1" ]; then
     $TESTPSQL -c "truncate table ${TABLEPREFIX}history"
   fi
   VACUUMSTART=`$RESULTPSQL -A -t -c "SELECT now()"`
-  $TESTPSQL -c "VACUUM VERBOSE"
+  $TESTPSQL -c "VACUUM"
   $TESTPSQL -c "CHECKPOINT"
   $RESULTPSQL -q -c "UPDATE tests SET cleanup=now() - '$VACUUMSTART'::timestamptz WHERE test=$TEST"
 fi
