@@ -103,9 +103,7 @@ Results
   index.html) that shows summary information and plots for all the tests.
 
 * If you manually adjust the test result database, you can then manually
-  regenerate both the summary graphs, and individual test graphs (although not
-  drill-downed, per-test html files, pg_settings.txt files or test summary
-  files) by running::
+  regenerate both the summary graphs, and individual test graphs by running::
 
     ./webreport
 
@@ -250,6 +248,7 @@ Credits
 =======
 
 Portions Copyright (c) 2007-2013, Gregory Smith
+
 Portions Copyright (c) 2014, Peter Geoghegan
 
 See COPYRIGHT file for full license details and HISTORY for a list of
