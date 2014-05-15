@@ -5,19 +5,19 @@ set term svg enhanced size resrepx,resrepy
 set datafile separator ","
 set style data linespoints
 set grid xtics ytics
-set output "disk.svg"
-set title "disk"
+set output "disk-tps.svg"
+set title "Disk TPS"
 set xlabel "Time during test"
-set ylabel "Disk Operations"
+set ylabel "Disk Tranfers (per second, indeterminate size)"
 set yrange [0:]
 min_time=system("echo $MIN_TIME")
 max_time=system("echo $MAX_TIME")
-max_disk=system("echo $MAX_DISK")
+max_disk=system("echo $MAX_DISK_TPS")
 set yrange [0:max_disk]
 set xdata time
 set timefmt "%s"
 set format x "%M:%S"
 set lmargin at screen 0.15;
 set xrange [min_time:max_time]
-plot "dstat.stat" using 1:16 title "disk reads" with linespoints linecolor rgb "blue", \
-"dstat.stat" using 1:17 title "disk writes" with linespoints linecolor rgb "orange"
+plot "dstat.stat" using 1:16 title "Reads" with linespoints linecolor rgb "blue", \
+"dstat.stat" using 1:17 title "Writes" with linespoints linecolor rgb "orange"

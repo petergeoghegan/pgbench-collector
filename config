@@ -61,13 +61,13 @@ MAX_WORKERS=`nproc`
 
 SCRIPT="tpc-b.sql"
 SCALES="10"
-SETCLIENTS="8 16 32"
+SETCLIENTS="8 32"
 SETTIMES=3
 
 # RUNTIME is in seconds.  If it is specified, then TOTTRANS is ignored.
 # Setting a time instead of a transaction account is only available
 # in 8.4 and later.
-RUNTIME=45
+RUNTIME=15
 TOTTRANS=""
 
 # A transaction count may be used instead
