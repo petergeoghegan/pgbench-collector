@@ -25,8 +25,8 @@ CREATE TABLE tests(
   workers int,
   trans int,
   avg_latency float,
-  max_latency float,
   percentile_90_latency float,
+  percentile_99_latency float,
   wal_written numeric,
   cleanup interval default null,
   rate_limit numeric default null

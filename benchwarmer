@@ -269,7 +269,10 @@ else
   $RESULTPSQL -c "copy timing from stdin with csv" < timing.csv
   # (This may be used within webreport)
 
-  $RESULTPSQL -q -c "update tests set avg_latency=(select avg(latency) from timing where tests.test=timing.test), max_latency=(select max(latency)from timing where tests.test=timing.test), percentile_90_latency=(select latency from timing where tests.test=timing.test order by latency offset (round(0.90*trans)) limit 1) where tests.test='$TEST'"
+  $RESULTPSQL -q -c "update tests set avg_latency=(select avg(latency) from timing where tests.test=timing.test), \
+  percentile_90_latency=(select latency from timing where tests.test=timing.test order by latency offset (round(0.90*trans)) limit 1), \
+  percentile_99_latency=(select latency from timing where tests.test=timing.test order by latency offset (round(0.99*trans)) limit 1) \
+  where tests.test='$TEST'"
 fi
 
 # Save some configuration information about the server
@@ -282,7 +285,7 @@ SETTINGS="pg_settings.txt"
 
 # Write out system and PostgreSQL installation
 echo Test results: > $SETTINGS
-$RESULTPSQL -c "select script,clients,round(tps) as tps,1000*round(avg_latency)/1000 as avg_latency,1000*round(max_latency)/1000 as max_latency from tests where test=$TEST" | grep -v " row)" >> $SETTINGS
+$RESULTPSQL -c "select script, clients, round(tps) as tps, 1000 * round(avg_latency) / 1000 as avg_latency from tests where test = $TEST" | grep -v " row)" >> $SETTINGS
 echo Server $SERVERHOST, client $CLIENTHOST >> $SETTINGS
 echo >> $SETTINGS
 echo "Server info and settings in postgresql.conf:" >> $SETTINGS

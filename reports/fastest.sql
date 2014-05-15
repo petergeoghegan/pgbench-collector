@@ -1,12 +1,16 @@
-SELECT
-  set,script,scale,clients,workers,
-  round(tps) AS tps
-FROM
+select
+  set,
+  info,
+  script,
+  scale,
+  clients,
+  workers,
+  round(tps) as tps
+from
 (
-  SELECT
-    set,script,scale,clients,workers,
-    max(tps) AS tps
-  FROM tests
-  GROUP BY set,script,scale,clients,workers
-) AS grouped
-ORDER BY tps DESC LIMIT 20;
+  select
+    t.set, info, script, scale, clients, workers, max(tps) as tps
+  from tests t join testset ts on t.set = ts.set
+  group by t.set, info, script, scale, clients, workers
+) as grouped
+order by tps desc limit 20;

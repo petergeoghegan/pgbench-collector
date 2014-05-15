@@ -21,12 +21,12 @@ function sed-i {
 }
 
 # Produce combined report, averaged across all test sets
-$RESULTPSQL -At -F" " -c "select scale,round(avg(dbsize) / (1024 * 1024)) as dbsize,round(avg(tps)) as tps from tests group by scale order by scale" > scaling.txt
+$RESULTPSQL -At -F" " -c "select scale,round(avg(dbsize) / (1024 * 1024)) as dbsize, round(avg(tps)) as tps from tests group by scale order by scale" > scaling.txt
 gnuplot plots/scaling.plot 2>&1 | grep -v "Warning: empty"
 mv scaling.svg results/
 rm scaling.txt
 
-$RESULTPSQL -At -F" " -c "select clients,round(avg(tps)) as tps from tests group by clients order by clients" > clients.txt
+$RESULTPSQL -At -F" " -c "select clients, round(avg(tps)) as tps from tests group by clients order by clients" > clients.txt
 gnuplot plots/clients.plot 2>&1 | grep -v "Warning: empty"
 mv clients.svg results/
 rm clients.txt
@@ -89,7 +89,7 @@ for SET in $SETS ; do
 	 to_char(round(avg(tps)), 'FM9G999G999G999G999') as avg_tps,
 	 round(1000 * avg(avg_latency)) / 1000 as avg_avg_latency,
 	 round(1000 * avg(percentile_90_latency)) / 1000 as "avg 90%<",
-	 round(1000 * max(max_latency)) / 1000 as max_latency
+	 round(1000 * avg(percentile_99_latency)) / 1000 as "avg 99%<"
 	 from tests where tests.set='$SET'
 	 group by set, scale
 	 order by set, scale;
@@ -102,7 +102,7 @@ ff
 	  to_char(round(avg(tps)), 'FM9G999G999G999G999') as avg_tps,
 	  round(1000 * avg(avg_latency)) / 1000 as avg_avg_latency,
 	  round(1000 * avg(percentile_90_latency)) / 1000 as "avg 90%<",
-	  round(1000 * max(max_latency)) / 1000 as max_latency
+	  round(1000 * avg(percentile_99_latency)) / 1000 as "avg 99%<"
 	  from tests where tests.set='$SET'
 	  group by set, clients
 	  order by set, clients;
@@ -118,7 +118,7 @@ ff
 	  to_char(round(stddev(tps)), 'FM9G999G999G999G999') as tps_stddev,
 	  round(1000 * avg(avg_latency)) / 1000 as avg_avg_latency,
 	  round(1000 * avg(percentile_90_latency)) / 1000 as "avg 90%<",
-	  round(1000 * max(max_latency)) / 1000 as max_latency
+	  round(1000 * avg(percentile_99_latency)) / 1000 as "avg 99%<"
         from tests where tests.set='$SET'
 	group by set, scale, clients, rate_limit
 	order by set, scale, clients, rate_limit;
@@ -133,7 +133,7 @@ ff
 	coalesce(rate_limit::text, '(none)') as rate_limit,
 	to_char(round(tps), 'FM9G999G999G999G999') as tps,
 	round(1000 * avg_latency) / 1000 as avg_latency,
-	max_latency,
+	round(1000 * percentile_99_latency) / 1000 as "99%<",
 	to_char(checkpoints_timed + checkpoints_req, 'FM9G999G999G999G999') as chkpts,
 	to_char(buffers_checkpoint , 'FM9G999G999G999G999') as buf_check,
 	to_char(buffers_clean , 'FM9G999G999G999G999') as buf_clean,
