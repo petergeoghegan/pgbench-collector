@@ -109,6 +109,14 @@ Results
 
     ./webreport
 
+Restarting from scratch
+=======================
+
+As a convenience, pgbench-collector makes available a script for automatically
+restarting from scratch::
+
+    ./cleanreport
+
 Test sets comparison
 ====================
 

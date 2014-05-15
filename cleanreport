@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# Used to re-initialize a result set (result DB and working directory)
+
+./config
+RESULTPSQL="psql -h $RESULTHOST -U $RESULTUSER -p $RESULTPORT -d $RESULTDB"
+
+rm -rf ./results/*
+# The script resultdb.sql is designed to replace all existing objects; it
+# should be sufficient to rely on it to do so
+RESULTPSQL -f ./init/resultdb.sql
