@@ -178,7 +178,7 @@ if [ "$OSDATA" -eq "1" ]; then
   # Delete dstat output, just in case there is some left over from before
   # (dstat output to file is always additive)
   rm $BASEDIR/dstat.out &> /dev/null
-  ./timed-os-stats dstat &
+  ./timed-os-stats dstat $DSTAT_DELAY_SECS &
   DSTAT=$!
 fi
 

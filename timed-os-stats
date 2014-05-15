@@ -64,10 +64,11 @@ if __name__=='__main__':
         usage()
 
     cmd=sys.argv[1]
+    arg=sys.argv[2]
 
     if sys.platform.startswith('linux'):
         if cmd=='dstat':
-            capture("dstat -Tcmgy --output dstat.out --disk-tps 10")
+            capture("dstat -Tcmgy --output dstat.out --disk-tps " + arg)
         else:
             usage()
     else:

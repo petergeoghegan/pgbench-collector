@@ -38,6 +38,11 @@ TABBED=1
 # that this is set consistently across test sets (i.e. for an entire benchmark)
 OSDATA=1
 
+# Controls the frequency at which dstat snapshots operating system
+# instrumentation.  If the overhead of the instrumentation is a concern, it may
+# be useful to increase this.
+DSTAT_DELAY_SECS=10
+
 # Test/result database connection
 TESTHOST=localhost
 TESTUSER=`whoami`
