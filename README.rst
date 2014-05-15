@@ -77,6 +77,13 @@ Running tests
     ./runset 5
 
    (An individual test set's set number is determined at the ./newset stage).
+   Naturally, since the whole point of specifying a set number to runset is to
+   avoid the assumption that the maximum set number is "current"/your set
+   number, care should be taken in specifying a set number.  Since the testset
+   table (the table that newset populates, in the results database) has a
+   unique constraint on its "info" (description) column, the appropriate set
+   number can reliably be obtained by querying the table (e.g. "SELECT set from
+   testset where info = 'mytestinfo'").
 
 Results
 =======

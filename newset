@@ -1,10 +1,10 @@
 #!/bin/bash
-SET="$1"
+SETINFO="$1"
 
 source ./config
 RESULTPSQL="psql -h $RESULTHOST -U $RESULTUSER -p $RESULTPORT -d $RESULTDB"
 
-if [ -z "$SET" ] ; then
+if [ -z "$SETINFO" ] ; then
   echo Usage:  $0 \"description\"
   echo Run without any parameters for help and to display existing sets
   echo
@@ -12,5 +12,5 @@ if [ -z "$SET" ] ; then
   exit 1
 fi
 
-$RESULTPSQL -c "INSERT INTO testset(info, testdb, testuser, testhost, testport) VALUES('$SET', '$TESTDB', '$TESTUSER', '$TESTHOST', '$TESTPORT');"
+$RESULTPSQL -c "INSERT INTO testset(info, testdb, testuser, testhost, testport) VALUES('$SETINFO', '$TESTDB', '$TESTUSER', '$TESTHOST', '$TESTPORT') RETURNING set as your_set_number"
 $RESULTPSQL -c "SELECT info, testdb, testuser, testhost, testport FROM testset ORDER BY set"
