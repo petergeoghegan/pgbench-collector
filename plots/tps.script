@@ -4,7 +4,7 @@ resrepy=system("echo $RESREPY")
 set term svg enhanced size resrepx,resrepy
 set output "tps.svg"
 set title "TPS"
-set grid xtics mxtics ytics mytics
+set grid xtics ytics mytics
 set xlabel "Time during test"
 set ylabel "TPS"
 # A yrange min of 0, to avoid interpolation line changing range
