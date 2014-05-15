@@ -7,6 +7,9 @@
 RESULTPSQL="psql -h $RESULTHOST -U $RESULTUSER -p $RESULTPORT -d $RESULTDB"
 
 rm -rf ./results/*
+rm -rf ./pgbench_log*
+rm -rf ./dstat.out
+rm -rf ./dstat.stat
 # The script resultdb.sql is designed to replace all existing objects; it
 # should be sufficient to rely on it to do so
 $RESULTPSQL -f ./init/resultdb.sql
