@@ -5,9 +5,6 @@
 BASEDIR=`pwd`
 PGBENCHBIN=`which pgbench`
 
-# These values are for pgbench 8.4 and later
-TESTDIR="tests"
-
 # SKIPINIT should be set to 1 either when simulating a cold cache, or
 # if you are not using the pgbench tables for your test
 SKIPINIT=0
