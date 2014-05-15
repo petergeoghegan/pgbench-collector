@@ -1,5 +1,7 @@
 #!/usr/bin/gnuplot
-set terminal svg size 800,600
+resrepx=system("echo $RESREPX")
+resrepy=system("echo $RESREPY")
+set term svg enhanced size resrepx,resrepy
 set datafile separator ","
 set style data lines
 set grid xtics ytics
