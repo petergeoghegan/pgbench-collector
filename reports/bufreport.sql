@@ -10,8 +10,7 @@ select
   buffers_clean as buf_clean,
   buffers_backend as buf_backend,
   buffers_alloc as buf_alloc,
-  buffers_backend_fsync as backend_sync,
-  max_dirty
+  buffers_backend_fsync as backend_sync
 from test_bgwriter bgw
 right join tests t on t.test = bgw.test
 join testset ts on ts.set = t.set

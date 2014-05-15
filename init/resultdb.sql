@@ -52,8 +52,7 @@ CREATE TABLE test_bgwriter(
   maxwritten_clean bigint,
   buffers_backend bigint,
   buffers_alloc bigint,
-  buffers_backend_fsync bigint,
-  max_dirty bigint
+  buffers_backend_fsync bigint
 );
 
 DROP TABLE IF EXISTS test_dstat;

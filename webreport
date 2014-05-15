@@ -133,6 +133,7 @@ ff
 	coalesce(rate_limit::text, '(none)') as rate_limit,
 	to_char(round(tps), 'FM9G999G999G999G999') as tps,
 	round(1000 * avg_latency) / 1000 as avg_latency,
+	round(1000 * percentile_90_latency) / 1000 as "90%<",
 	round(1000 * percentile_99_latency) / 1000 as "99%<",
 	to_char(checkpoints_timed + checkpoints_req, 'FM9G999G999G999G999') as chkpts,
 	to_char(buffers_checkpoint , 'FM9G999G999G999G999') as buf_check,
@@ -140,7 +141,6 @@ ff
 	to_char(buffers_backend, 'FM9G999G999G999G999') as buf_backend,
 	to_char(buffers_alloc, 'FM9G999G999G999G999') as buf_alloc,
 	to_char(maxwritten_clean, 'FM9G999G999G999G999') as max_clean,
-	to_char(max_dirty, 'FM9G999G999G999G999') as max_dirty,
 	to_char(wal_written, 'FM9G999G999G999G999') as wal_written,
 	to_char(start_time, 'HH24:MI:SS') as start,
 	cleanup
