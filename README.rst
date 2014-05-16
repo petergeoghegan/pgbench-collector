@@ -21,8 +21,8 @@ All statistics and instrumentation is stored in a PostgreSQL database. It is pos
 * Fully re-generate reports with all details intact without access to anything
   more than the results database. This includes dstat instrumentation.
 
-* Normalized graphs, to make graph comparisons across tests and runs as simple
-  and intuitive as possible.
+* Product normalized graphs, to make graph comparisons across tests and runs as
+  simple and intuitive as possible.
 
 * Explicitly specify which test set is being run. This allows benchmarks of
   multiple PostgreSQL systems to be collected in parallel, since each server
