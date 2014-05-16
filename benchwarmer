@@ -263,7 +263,7 @@ else
 
   # Import timestamp information
   $BASEDIR/log-to-csv $TEST < pgbench.log > timing.csv
-  $RESULTPSQL -c "copy timing from stdin with csv" < timing.csv
+  $RESULTPSQL -c "set timezone to 'utc'; copy timing from stdin with csv" < timing.csv
   # (This may be used within webreport)
 
   $RESULTPSQL -q -c "update tests set avg_latency=(select avg(latency) from timing where tests.test=timing.test), \
