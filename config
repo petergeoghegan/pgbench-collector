@@ -14,7 +14,11 @@ SKIPINIT=0
 # SKIPREPORT should be set to 1 when html report generation at the end of each
 # set run is not required.  You can always directly run ./webreport some time
 # later, perhaps on an entirely different machine that only has access to the
-# results database.
+# results database.  If there are many tests performed within a single results
+# database, it will be compelling to avoid generating a report at the end of
+# each test set run, since this re-generates *all* prior graphs (this is
+# necessary due to the normalization of xrange and yrange that occurs across
+# tests and runs -- each new test set invalidates old graphs).
 SKIPREPORT=0
 
 # These indicate dimensions that webreport should generate drill-down, per test

@@ -258,5 +258,4 @@ Portions Copyright (c) 2007-2013, Gregory Smith
 
 Portions Copyright (c) 2014, Peter Geoghegan
 
-See COPYRIGHT file for full license details and HISTORY for a list of
-other contributors to the program.
+See COPYRIGHT file for full license details.
