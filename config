@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Basic setup options.  If you are running as the postgres user and
 # are using PostgreSQL 8.4 or later, you normally don't need to
 # change any of these.
@@ -15,14 +17,14 @@ SKIPINIT=0
 # results database.
 SKIPREPORT=0
 
-# These indicate dimensions that ./webreport should generate drill-down, per
-# test graphs for (including momement to moment TPS figures, and dstat
+# These indicate dimensions that webreport should generate drill-down, per test
+# graphs for (including momement to moment TPS figures, and dstat
 # instrumentation)
 RESREPX=800
 RESREPY=600
 
 # TPS interpolated spline weight for per-test TPS breakdown.  It can sometimes
-# be useful to set this as low as 0.1, to better visualize highly noisey TPS
+# be useful to set this as low as 0.1, to better visualize highly noisy TPS
 # graphs.  (Note that this can be tweaked iteratively, by running ./webreport
 # repeatedly)
 TPS_WEIGHT=1.0
@@ -51,11 +53,10 @@ RESULTUSER="$TESTUSER"
 RESULTPORT="$TESTPORT"
 RESULTDB=results
 
-#
 # Main test run customization
 #
-
-# Set this to a number only when using pgbench 9.0 or later.  This will set
+# Set this to a number only when using pgbench 9.0 or later (it is recommended
+# that a 9.0+ era pgbench be used in order for this to work).  This will set
 # the number of worker threads up to this maximum for each client count
 MAX_WORKERS=`nproc`
 
@@ -65,8 +66,6 @@ SETCLIENTS="8 32"
 SETTIMES=3
 
 # RUNTIME is in seconds.  If it is specified, then TOTTRANS is ignored.
-# Setting a time instead of a transaction account is only available
-# in 8.4 and later.
 RUNTIME=15
 TOTTRANS=""
 
@@ -74,6 +73,6 @@ TOTTRANS=""
 #RUNTIME=""
 #TOTTRANS=100000
 
-# Starting in the 9.4 pgbench, you can limit the maximum rate.
-# This takes a list like scale and clients
+# Starting in the 9.4 pgbench, you can limit the maximum rate.  This takes a
+# list like scale and clients
 SETRATES=""
