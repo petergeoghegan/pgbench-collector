@@ -3,13 +3,16 @@ resrepx=system("echo $RESREPX")
 resrepy=system("echo $RESREPY")
 set term png enhanced size resrepx,resrepy
 set output "latency.png"
-set title "Latency"
+set title "Latency (average, 90th percentile, 99th percentile)"
 set grid xtics ytics
 set xlabel "Time during test"
 set ylabel "Latency (ms)"
 max_latency=system("echo $MAX_LATENCY")
 min_time=system("echo $MIN_TIME")
 max_time=system("echo $MAX_TIME")
+avg_lat=system("echo $AVG_LAT")
+nin_perc=system("echo $NIN_PERC")
+nin_nin_perc=system("echo $NIN_NIN_PERC")
 # A yrange min of 0, to avoid interpolation line changing range
 set timefmt "%s"
 set format x "%M:%S"
@@ -19,5 +22,12 @@ set timefmt "%s"
 set format x "%M:%S"
 set lmargin at screen 0.15;
 set xrange [min_time:max_time]
+set style line 1 lc rgb 'green' pt 1 ps 1 lt 1 lw 1
+set style line 2 lc rgb 'orange' pt 1 ps 1 lt 1 lw 1
+set style line 3 lc rgb 'red' pt 1 ps 1 lt 1 lw 1
+set arrow 1 from graph 0,first avg_lat to graph 1,first avg_lat ls 1 nohead front
+set arrow 2 from graph 0,first nin_perc to graph 1,first nin_perc ls 2 nohead front
+set arrow 3 from graph 0,first nin_nin_perc to graph 1,first nin_nin_perc ls 3 nohead front
+
 plot "latency.txt" using 1:2 with dots notitle linecolor rgb "purple", \
-"latency.txt" using 1:2:(1) title "Interpolated Latency (Weighted spline, weight 1)" smooth acsplines linecolor rgb "black"
+"latency.txt" using 1:2:(1) title "Interpolated Latency (Weighted spline, weight 1.00)" smooth acsplines linecolor rgb "black"
