@@ -89,7 +89,7 @@ echo Running tests using:  $TESTPSQL
 echo Storing results using:  $RESULTPSQL
 
 # See if this database has all the standard pgbench tables in it
-PGCOUNT=`$TESTPSQL -A -t -c "SELECT count(*)  FROM pg_stat_user_tables WHERE relname IN ('pgbench_history','pgbench_tellers','pgbench_accounts','pgbench_branches')"`
+PGCOUNT=`$TESTPSQL -A -t -c "SELECT count(*)  FROM pg_stat_user_tables WHERE relname IN ('pgbench_history', 'pgbench_tellers', 'pgbench_accounts', 'pgbench_branches')"`
 if [ "$PGCOUNT" -eq 4 ] ; then
   PGBENCH_TABLES=1
   echo Found standard pgbench tables
@@ -187,7 +187,7 @@ echo Script $SCRIPT executing for $CLIENTS concurrent users... 1>&2
 $PGBENCHBIN -f $BASEDIR/tests/$SCRIPT -s $SCALE -l -n $TESTLEN -U $TESTUSER -h $TESTHOST -p $TESTPORT -c $CLIENTS $WORKERS $RATEOPT $TESTDB > results.txt &
 P=$!
 wait $P
-$RESULTPSQL -q -c "update tests set end_time=now() where test=$TEST"
+$RESULTPSQL -q -c "update tests set end_time = now() where test = $TEST"
 
 if [ "$OSDATA" -eq "1" ]; then
   # The PIDs we have will be the process ID of the Python timed-os-stats
@@ -205,21 +205,21 @@ fi
 # Update bgwriter data with delta
 get_bgwriter
 $RESULTPSQL -c "update test_bgwriter set \
-  checkpoints_timed=$checkpoints_timed - checkpoints_timed,\
-  checkpoints_req=$checkpoints_req - checkpoints_req,\
-  buffers_checkpoint=$buffers_checkpoint - buffers_checkpoint,\
-  buffers_clean=$buffers_clean - buffers_clean,\
-  maxwritten_clean=$maxwritten_clean - maxwritten_clean,\
-  buffers_backend=$buffers_backend - buffers_backend,\
-  buffers_alloc=$buffers_alloc - buffers_alloc,\
-  buffers_backend_fsync=$buffers_backend_fsync - buffers_backend_fsync \
-  where test='$TEST'"
+  checkpoints_timed = $checkpoints_timed - checkpoints_timed,\
+  checkpoints_req = $checkpoints_req - checkpoints_req,\
+  buffers_checkpoint = $buffers_checkpoint - buffers_checkpoint,\
+  buffers_clean = $buffers_clean - buffers_clean,\
+  maxwritten_clean = $maxwritten_clean - maxwritten_clean,\
+  buffers_backend = $buffers_backend - buffers_backend,\
+  buffers_alloc = $buffers_alloc - buffers_alloc,\
+  buffers_backend_fsync = $buffers_backend_fsync - buffers_backend_fsync \
+  where test = '$TEST'"
 
 # WAL values are initially saved as text because they're pulled from the test
 # database--but the functions to turn them into numeric types is available
 # only in the results one.
 END_WAL=`$TESTPSQL -A -t -F" " -c "select pg_current_xlog_location()"`
-$RESULTPSQL -q -c "UPDATE tests SET wal_written=wal_lsn('$END_WAL') - wal_lsn('$START_WAL') WHERE test=$TEST"
+$RESULTPSQL -q -c "UPDATE tests SET wal_written = wal_lsn('$END_WAL') - wal_lsn('$START_WAL') WHERE test = $TEST"
 
 cat results.txt
 
@@ -234,7 +234,7 @@ if [ "$SKIPINIT" -ne "1" ]; then
   VACUUMSTART=`$RESULTPSQL -A -t -c "SELECT now()"`
   $TESTPSQL -c "VACUUM"
   $TESTPSQL -c "CHECKPOINT"
-  $RESULTPSQL -q -c "UPDATE tests SET cleanup=now() - '$VACUUMSTART'::timestamptz WHERE test=$TEST"
+  $RESULTPSQL -q -c "UPDATE tests SET cleanup = now() - '$VACUUMSTART'::timestamptz WHERE test = $TEST"
 fi
 
 # Save pgbench log
@@ -248,7 +248,7 @@ cat pgbench.log | cut -f 3 -d " " | sort -n | tail -n 5
 
 tps=`grep "(including connections establishing)" results.txt | cut -d " " -f 3`
 trans=`grep "number of transactions actually processed:" results.txt | cut -d":" -f 2 | cut -d "/" -f 1`
-$RESULTPSQL -q -c "update tests set tps='$tps',trans='$trans' where test=$TEST"
+$RESULTPSQL -q -c "update tests set tps = '$tps', trans = '$trans' where test = $TEST"
 
 # Confirm we have an patched version of pgbench that has timestamps
 TESTFORTS=`cat pgbench.log | head -n 1 | cut -d" " -f 6`
@@ -321,7 +321,8 @@ mount >> $SETTINGS
 
 # Finally, store settings file within database
 CONTENTS=`cat $SETTINGS`
-$RESULTPSQL -q -c "update testset set settings=\$settings\$$CONTENTS\$settings\$ where set = '$SET'"
+# Use Postgres dollar quotes here, as a good-enough form of escaping
+$RESULTPSQL -q -c "update testset set settings= \$settings\$$CONTENTS\$settings\$ where set = '$SET'"
 
 # Remove temporary files
 rm pgbench_log.${P}*
