@@ -231,12 +231,13 @@ cat templates/footer.html >> $OUTFILE
 export MAX_TPS=`$RESULTPSQL -A -t -c "with tps as(select extract(epoch from date_trunc('second', ts)) as sec, count(*) as sec_tps from timing group by date_trunc('second', ts)) select max(sec_tps) * 1.15 from tps;"`
 export MAX_LATENCY=`$RESULTPSQL -A -t -c "select max(latency) from timing"`
 
-MAX_Y_FOR_DSTAT=$($RESULTPSQL -A -t -F' ' -c "select (max(greatest(mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, 10))/1e6) * 1.05 as mem, max(greatest(paging_pages_in, paging_pages_out, 10)) * 1.05 as paging, max(greatest(system_interrupts, system_context_switches, 10)) * 1.05 as system, max(greatest(disk_read_tps, disk_write_tps, 1)) * 1.05 as disk from test_dstat")
+MAX_Y_FOR_DSTAT=$($RESULTPSQL -A -t -F' ' -c "select (max(greatest(mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, 10))/1e6) * 1.05 as mem, max(greatest(paging_pages_in, paging_pages_out, 10)) * 1.05 as paging, max(greatest(system_interrupts, system_context_switches, 10)) * 1.05 as system, max(greatest(disk_read_tps, disk_write_tps, 1)) * 1.05 as disk, max(greatest(disk_read_requests, disk_write_requests, 1)) * 1.05 as io from test_dstat")
 
 export MAX_MEM=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $1}')
 export MAX_PAGING=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $2}')
 export MAX_SYSTEM=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $3}')
 export MAX_DISK_TPS=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $4}')
+export MAX_IO=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $5}')
 
 export TPS_WEIGHT=$TPS_WEIGHT
 export RESREPX=$RESREPX
@@ -259,7 +260,7 @@ for TEST in $TESTS ; do
   rm tpsdata.txt
   rm latency.txt
 
-  $RESULTPSQL -t -A -F"," -c "select extract (epoch from taken), cpu_perc_usr, cpu_perc_sys, cpu_perc_idle, cpu_perc_wait, cpu_perc_hiq, cpu_perc_siq, mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, paging_pages_in, paging_pages_out, system_interrupts, system_context_switches, disk_read_tps, disk_write_tps from test_dstat where test = '$TEST' order by dstatid asc" > $BASEDIR/dstat.stat
+  $RESULTPSQL -t -A -F"," -c "select extract (epoch from taken), cpu_perc_usr, cpu_perc_sys, cpu_perc_idle, cpu_perc_wait, cpu_perc_hiq, cpu_perc_siq, mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, paging_pages_in, paging_pages_out, system_interrupts, system_context_switches, disk_read_tps, disk_write_tps, disk_read_requests, disk_write_requests from test_dstat where test = '$TEST' order by dstatid desc" > $BASEDIR/dstat.stat
 
   mkdir -p "$BASEDIR/results/$TEST/"
   cp $BASEDIR/templates/test-index.html $BASEDIR/results/$TEST/index.html
@@ -272,12 +273,14 @@ for TEST in $TESTS ; do
   if [ "$OSDATA" -eq "1" ]; then
     gnuplot $BASEDIR/plots/memory.script
     gnuplot $BASEDIR/plots/disk-tps.script
+    gnuplot $BASEDIR/plots/io.script
     gnuplot $BASEDIR/plots/cpu.script
     gnuplot $BASEDIR/plots/paging.script
     gnuplot $BASEDIR/plots/system.script
 
     mv $BASEDIR/memory.svg $BASEDIR/results/$TEST
     mv $BASEDIR/disk-tps.svg $BASEDIR/results/$TEST
+    mv $BASEDIR/io.svg $BASEDIR/results/$TEST
     mv $BASEDIR/cpu.svg $BASEDIR/results/$TEST
     mv $BASEDIR/paging.svg $BASEDIR/results/$TEST
     mv $BASEDIR/system.svg $BASEDIR/results/$TEST

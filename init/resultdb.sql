@@ -75,7 +75,9 @@ CREATE TABLE test_dstat(
   system_interrupts bigint,
   system_context_switches bigint,
   disk_read_tps bigint,
-  disk_write_tps bigint
+  disk_write_tps bigint,
+  disk_read_requests numeric,
+  disk_write_requests numeric
 );
 
 CREATE INDEX idx_test_dstat on test_dstat(test);
@@ -99,7 +101,9 @@ CREATE TABLE temp_test_dstat(
   system_interrupts text,
   system_context_switches text,
   disk_read_tps text,
-  disk_write_tps text
+  disk_write_tps text,
+  disk_read_requests text,
+  disk_write_requests text
 );
 
 CREATE INDEX idx_temp_test_dstat on temp_test_dstat(test);
@@ -180,7 +184,9 @@ insert into test_dstat(
   system_interrupts,
   system_context_switches,
   disk_read_tps,
-  disk_write_tps)
+  disk_write_tps,
+  disk_read_requests,
+  disk_write_requests)
 select
   $1,
   to_timestamp(taken_since_epoch),
@@ -199,7 +205,9 @@ select
   system_interrupts::numeric::bigint,
   system_context_switches::numeric::bigint,
   disk_read_tps::numeric::bigint,
-  disk_write_tps::numeric::bigint
+  disk_write_tps::numeric::bigint,
+  disk_read_requests::numeric,
+  disk_write_requests::numeric
 from
   temp_test_dstat where test = $1;
 

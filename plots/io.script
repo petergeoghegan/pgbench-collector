@@ -1,0 +1,23 @@
+#!/usr/bin/gnuplot
+resrepx=system("echo $RESREPX")
+resrepy=system("echo $RESREPY")
+set term svg enhanced size resrepx,resrepy
+set datafile separator ","
+set style data linespoints
+set grid xtics ytics
+set output "io.svg"
+set title "I/O"
+set xlabel "Time during test"
+set ylabel "I/O requests"
+set yrange [0:]
+min_time=system("echo $MIN_TIME")
+max_time=system("echo $MAX_TIME")
+max_io=system("echo $MAX_IO")
+set yrange [0:max_io]
+set xdata time
+set timefmt "%s"
+set format x "%M:%S"
+set lmargin at screen 0.15;
+set xrange [min_time:max_time]
+plot "dstat.stat" using 1:18 title "Read Requests" with linespoints linecolor rgb "red", \
+"dstat.stat" using 1:19 title "Write Requests" with linespoints linecolor rgb "cyan"
