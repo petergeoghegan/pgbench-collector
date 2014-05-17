@@ -169,7 +169,7 @@ fi
 # Grab starting values for statistics
 get_bgwriter
 START_WAL=`$TESTPSQL -A -t -F" " -c "select pg_current_xlog_location()"`
-$RESULTPSQL -c "insert into test_bgwriter(test,checkpoints_timed,checkpoints_req,buffers_checkpoint,buffers_clean,maxwritten_clean,buffers_backend,buffers_alloc,buffers_backend_fsync) values('$TEST','$checkpoints_timed','$checkpoints_req','$buffers_checkpoint','$buffers_clean','$maxwritten_clean','$buffers_backend','$buffers_alloc','$buffers_backend_fsync')"
+$RESULTPSQL -c "insert into test_bgwriter(test, checkpoints_timed, checkpoints_req, buffers_checkpoint, buffers_clean, maxwritten_clean, buffers_backend, buffers_alloc, buffers_backend_fsync) values('$TEST','$checkpoints_timed','$checkpoints_req','$buffers_checkpoint','$buffers_clean','$maxwritten_clean','$buffers_backend','$buffers_alloc','$buffers_backend_fsync')"
 
 echo This is test $TEST
 
@@ -267,8 +267,8 @@ else
   # (This may be used within webreport)
 
   $RESULTPSQL -q -c "update tests set avg_latency=(select avg(latency) from timing where tests.test=timing.test), \
-  percentile_90_latency=(select latency from timing where tests.test=timing.test order by latency offset (round(0.90*trans)) limit 1), \
-  percentile_99_latency=(select latency from timing where tests.test=timing.test order by latency offset (round(0.99*trans)) limit 1) \
+  percentile_90_latency = (select latency from timing where tests.test = timing.test order by latency offset (round(0.90*trans)) limit 1), \
+  percentile_99_latency = (select latency from timing where tests.test = timing.test order by latency offset (round(0.99*trans)) limit 1) \
   where tests.test='$TEST'"
 fi
 
@@ -288,7 +288,7 @@ echo >> $SETTINGS
 echo "Server info and settings in postgresql.conf:" >> $SETTINGS
 $TESTPSQL -At -c "select version();" | grep -v " row" >> $SETTINGS
 $TESTPSQL -c "show data_directory" | grep -v " row" >> $SETTINGS
-$TESTPSQL -c "select name,current_setting(name) from pg_settings where source='configuration file' and not name in ('DateStyle','lc_messages','lc_monetary','lc_numeric','lc_time','listen_addresses','log_directory','log_rotation_age','log_rotation_size','log_truncate_on_rotation');" | grep -v " rows)" >> $SETTINGS
+$TESTPSQL -c "select name, current_setting(name) from pg_settings where source ='configuration file' and not name in ('DateStyle', 'lc_messages', 'lc_monetary', 'lc_numeric', 'lc_time', 'listen_addresses', 'log_directory', 'log_rotation_age', 'log_rotation_size', 'log_truncate_on_rotation');" | grep -v " rows)" >> $SETTINGS
 
 # Operating system information
 echo >> $SETTINGS

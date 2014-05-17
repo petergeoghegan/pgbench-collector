@@ -23,7 +23,11 @@ function sed-i {
 }
 
 # Produce combined report, averaged across all test sets
-$RESULTPSQL -At -F" " -c "select scale,round(avg(dbsize) / (1024 * 1024)) as dbsize, round(avg(tps)) as tps from tests group by scale order by scale" > scaling.txt
+$RESULTPSQL -At -F" " -c "select scale, \
+  round(avg(dbsize) / (1024 * 1024)) as dbsize, \
+  round(avg(tps)) as tps \
+  from tests \
+  group by scale order by scale" > scaling.txt
 gnuplot plots/scaling.plot 2>&1 | grep -v "Warning: empty"
 mv scaling.svg results/
 rm scaling.txt
@@ -73,7 +77,12 @@ for SET in $SETS ; do
   LASTSET="$SET"
 
   # Generate graphs for just this test set
-  $RESULTPSQL -At -F" " -c "select scale,round(avg(dbsize) / (1024 * 1024)) as dbsize,round(avg(tps)) as tps from tests where set='$SET' group by scale order by scale" > scaling.txt
+  $RESULTPSQL -At -F" " -c "select scale, \
+  round(avg(dbsize) / (1024 * 1024)) as dbsize, \
+  round(avg(tps)) as tps \
+  from tests where set='$SET' \
+  group by scale order by scale" > scaling.txt
+
   gnuplot plots/scaling.plot 2>&1 | grep -v "Warning: empty"
   mv scaling.svg results/scaling-$SET.svg
   mv scaling.txt scaling-$SET.txt
@@ -230,7 +239,14 @@ cat templates/footer.html >> $OUTFILE
 if [ "$OSDATA" -eq "1" ]; then
   # If OSDATA graphs will be generated, produce environment variables that
   # GnuPlot can use to normalize them across all tests/sets
-  MAX_Y_FOR_DSTAT=$($RESULTPSQL -A -t -F' ' -c "select (max(greatest(mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, 10))/1e6) * 1.05 as mem, max(greatest(paging_pages_in, paging_pages_out, 10)) * 1.05 as paging, max(greatest(system_interrupts, system_context_switches, 10)) * 1.05 as system, max(greatest(disk_read_tps, disk_write_tps, 1)) * 1.05 as disk, max(greatest(disk_read_requests, disk_write_requests, 1)) * 1.05 as io, (max(greatest(disk_read_bytes, disk_write_bytes, 1))/1e6) * 1.05 as disk_bytes from test_dstat")
+  MAX_Y_FOR_DSTAT=$($RESULTPSQL -A -t -F' ' -c "select \
+  (max(greatest(mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, 10))/1e6) * 1.05 as mem, \
+  max(greatest(paging_pages_in, paging_pages_out, 10)) * 1.05 as paging, \
+  max(greatest(system_interrupts, system_context_switches, 10)) * 1.05 as system, \
+  max(greatest(disk_read_tps, disk_write_tps, 1)) * 1.05 as disk, \
+  max(greatest(disk_read_requests, disk_write_requests, 1)) * 1.05 as io, \
+  (max(greatest(disk_read_bytes, disk_write_bytes, 1))/1e6) * 1.05 as disk_bytes \
+  from test_dstat")
 
   export MAX_MEM=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $1}')
   export MAX_PAGING=$(echo $MAX_Y_FOR_DSTAT | awk -F' ' '{print $2}')
@@ -241,7 +257,9 @@ if [ "$OSDATA" -eq "1" ]; then
 fi
 
 # Get MAX_TPS and MAX_LATENCY, to make all graphs directly comparable across runs (GnuPlot looks for this)
-export MAX_TPS=`$RESULTPSQL -A -t -c "with tps as(select extract(epoch from date_trunc('second', ts)) as sec, count(*) as sec_tps from timing group by date_trunc('second', ts)) select max(sec_tps) * 1.15 from tps;"`
+export MAX_TPS=`$RESULTPSQL -A -t -c "with tps as(select extract(epoch from date_trunc('second', ts)) as sec, \
+  count(*) as sec_tps from timing group by date_trunc('second', ts)) \
+  select max(sec_tps) * 1.15 from tps;"`
 export MAX_LATENCY=`$RESULTPSQL -A -t -c "select max(latency) from timing"`
 
 # Export settings for GnuPlot
@@ -258,7 +276,10 @@ for TEST in $TESTS ; do
   export MIN_TIME=$(echo $MIN_AND_MAX_TIME | awk -F' ' '{print $1}')
   export MAX_TIME=$(echo $MIN_AND_MAX_TIME | awk -F' ' '{print $2}')
 
-  $RESULTPSQL -A -t -F' ' -c "select extract(epoch from date_trunc('second', ts)), count(*) from timing where test = '$TEST' group by date_trunc('second', ts) order by date_trunc('second', ts)" > tpsdata.txt
+  $RESULTPSQL -A -t -F' ' -c "select extract(epoch from date_trunc('second', ts)), \
+  count(*) \
+  from timing where test = '$TEST' \
+  group by date_trunc('second', ts) order by date_trunc('second', ts)" > tpsdata.txt
   gnuplot $BASEDIR/plots/tps.script
 
   $RESULTPSQL -A -t -F' ' -c "select extract(epoch from ts), latency from timing where test = '$TEST'" > latency.txt
@@ -275,7 +296,21 @@ for TEST in $TESTS ; do
   rm tpsdata.txt
   rm latency.txt
 
-  $RESULTPSQL -t -A -F"," -c "select extract (epoch from taken), cpu_perc_usr, cpu_perc_sys, cpu_perc_idle, cpu_perc_wait, cpu_perc_hiq, cpu_perc_siq, mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, paging_pages_in, paging_pages_out, system_interrupts, system_context_switches, disk_read_tps, disk_write_tps, disk_read_requests, disk_write_requests, disk_read_bytes, disk_write_bytes from test_dstat where test = '$TEST' order by dstatid desc" > $BASEDIR/dstat.stat
+  $RESULTPSQL -q -c "update tests set avg_latency=(select avg(latency) from timing where tests.test=timing.test), \
+  percentile_90_latency = (select latency from timing where tests.test = timing.test order by latency offset (round(0.90*trans)) limit 1), \
+  percentile_99_latency = (select latency from timing where tests.test = timing.test order by latency offset (round(0.99*trans)) limit 1) \
+  where tests.test = '$TEST'"
+
+  $RESULTPSQL -t -A -F"," -c "select extract(epoch from taken), \
+  cpu_perc_usr, cpu_perc_sys, cpu_perc_idle, cpu_perc_wait, cpu_perc_hiq, cpu_perc_siq, \
+  mem_used_bytes, mem_buff_bytes, mem_cache_bytes, mem_free_bytes, \
+  paging_pages_in, paging_pages_out, \
+  system_interrupts, system_context_switches, \
+  disk_read_tps, disk_write_tps, \
+  disk_read_requests, disk_write_requests, \
+  disk_read_bytes, disk_write_bytes \
+  from test_dstat where test = '$TEST' \
+  order by dstatid desc" > $BASEDIR/dstat.stat
 
   mkdir -p "$BASEDIR/results/$TEST/"
   cp $BASEDIR/templates/test-index.html $BASEDIR/results/$TEST/index.html
