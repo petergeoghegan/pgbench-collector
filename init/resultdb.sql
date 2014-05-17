@@ -40,7 +40,7 @@ CREATE TABLE timing(
   test int NOT NULL REFERENCES tests(test)
   );
 
-CREATE INDEX idx_timing_test on timing(test,ts);
+CREATE INDEX idx_timing_test on timing(test, ts);
 
 DROP TABLE IF EXISTS test_bgwriter;
 CREATE TABLE test_bgwriter(
@@ -77,7 +77,9 @@ CREATE TABLE test_dstat(
   disk_read_tps bigint,
   disk_write_tps bigint,
   disk_read_requests numeric,
-  disk_write_requests numeric
+  disk_write_requests numeric,
+  disk_read_bytes bigint,
+  disk_write_bytes bigint
 );
 
 CREATE INDEX idx_test_dstat on test_dstat(test);
@@ -103,7 +105,9 @@ CREATE TABLE temp_test_dstat(
   disk_read_tps text,
   disk_write_tps text,
   disk_read_requests text,
-  disk_write_requests text
+  disk_write_requests text,
+  disk_read_bytes text,
+  disk_write_bytes text
 );
 
 CREATE INDEX idx_temp_test_dstat on temp_test_dstat(test);
@@ -186,7 +190,9 @@ insert into test_dstat(
   disk_read_tps,
   disk_write_tps,
   disk_read_requests,
-  disk_write_requests)
+  disk_write_requests,
+  disk_read_bytes,
+  disk_write_bytes)
 select
   $1,
   to_timestamp(taken_since_epoch),
@@ -207,7 +213,9 @@ select
   disk_read_tps::numeric::bigint,
   disk_write_tps::numeric::bigint,
   disk_read_requests::numeric,
-  disk_write_requests::numeric
+  disk_write_requests::numeric,
+  disk_read_bytes::numeric::bigint,
+  disk_write_bytes::numeric::bigint
 from
   temp_test_dstat where test = $1;
 

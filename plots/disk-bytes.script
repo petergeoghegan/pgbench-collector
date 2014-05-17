@@ -1,0 +1,25 @@
+#!/usr/bin/gnuplot
+resrepx=system("echo $RESREPX")
+resrepy=system("echo $RESREPY")
+set term svg enhanced size resrepx,resrepy
+set datafile separator ","
+set style data linespoints
+set grid xtics ytics
+set output "disk-bytes.svg"
+set title "Disk"
+set xlabel "Time during test"
+set ylabel "Disk Reads/Writes (MB)"
+set yrange [0:]
+min_time=system("echo $MIN_TIME")
+max_time=system("echo $MAX_TIME")
+max_disk_bytes=system("echo $MAX_DISK_BYTES")
+set yrange [0:max_disk_bytes]
+set xdata time
+set timefmt "%s"
+set format x "%M:%S"
+set lmargin at screen 0.15;
+set xrange [min_time:max_time]
+set style line 1 lc rgb 'red' pt 1 ps 1 lt 2 lw 2
+set style line 2 lc rgb 'cyan' pt 6 ps 1 lt 2 lw 2
+plot "dstat.stat" using 1:($20/1e6) title "Reads" with linespoints ls 1, \
+"dstat.stat" using 1:($21/1e6) title "Writes" with linespoints ls 2
