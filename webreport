@@ -253,7 +253,7 @@ if [ "$OSDATA" -eq "1" ]; then
 fi
 
 # Get MAX_TPS and MAX_LATENCY, to make all graphs directly comparable across runs (GnuPlot looks for this)
-export MAX_TPS=`$RESULTPSQL -A -t -c "select max(num_of_transactions) from timing;"`
+export MAX_TPS=`$RESULTPSQL -A -t -c "select max(tt) from (select sum(num_of_transactions) tt, extract(epoch from date_trunc('second', ts)) from timing group by 2) j;"`
 export MAX_LATENCY=`$RESULTPSQL -A -t -c "select max(max_latency)/1000 from timing"`
 
 # Export settings for GnuPlot
@@ -271,9 +271,9 @@ for TEST in $TESTS ; do
   export MAX_TIME=$(echo $MIN_AND_MAX_TIME | awk -F' ' '{print $2}')
 
   $RESULTPSQL -A -t -F' ' -c "select extract(epoch from date_trunc('second', ts)), \
-	  num_of_transactions \
+	  sum(num_of_transactions) \
   from timing where test = '$TEST' \
-  order by 1" > tpsdata.txt
+  group by 1 order by 1" > tpsdata.txt
   gnuplot $BASEDIR/plots/tps.script
 
   # convert latencies to milliseconds
