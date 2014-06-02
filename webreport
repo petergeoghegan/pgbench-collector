@@ -99,8 +99,7 @@ for SET in $SETS ; do
 	 scale,
 	 to_char(round(avg(tps)), 'FM9G999G999G999G999') as avg_tps,
 	 round(1000 * avg(avg_latency)) / 1000 as avg_avg_latency,
-	 round(1000 * avg(percentile_90_latency)) / 1000 as "avg 90%<",
-	 round(1000 * avg(percentile_99_latency)) / 1000 as "avg 99%<"
+	 round(1000 * max(max_latency)) / 1000 as max_latency
 	 from tests where tests.set='$SET'
 	 group by set, scale
 	 order by set, scale;
@@ -110,10 +109,9 @@ ff
   $RESULTPSQL -H -X >> $OUTFILE <<ff
   select set,
 	  clients,
-	  to_char(round(avg(tps)), 'FM9G999G999G999G999') as avg_tps,
-	  round(1000 * avg(avg_latency)) / 1000 as avg_avg_latency,
-	  round(1000 * avg(percentile_90_latency)) / 1000 as "avg 90%<",
-	  round(1000 * avg(percentile_99_latency)) / 1000 as "avg 99%<"
+	  to_char(round(avg(tps)), 'FM9G999G999G999G999') as bucket_avg_tps,
+	  round(1000 * avg(avg_latency)) / 1000 as bucket_avg_latency,
+	  round(1000 * max(max_latency)) / 1000 as max_latency
 	  from tests where tests.set='$SET'
 	  group by set, clients
 	  order by set, clients;
@@ -125,11 +123,10 @@ ff
 	  scale,
 	  clients,
 	  coalesce(rate_limit::text, '(none)') as rate_limit,
-	  to_char(round(avg(tps)), 'FM9G999G999G999G999') as avg_tps,
-	  to_char(round(stddev(tps)), 'FM9G999G999G999G999') as tps_stddev,
-	  round(1000 * avg(avg_latency)) / 1000 as avg_avg_latency,
-	  round(1000 * avg(percentile_90_latency)) / 1000 as "avg 90%<",
-	  round(1000 * avg(percentile_99_latency)) / 1000 as "avg 99%<"
+	  to_char(round(avg(tps)), 'FM9G999G999G999G999') as bucket_avg_tps,
+	  to_char(round(stddev(tps)), 'FM9G999G999G999G999') as bucket_tps_stddev,
+	  round(1000 * avg(avg_latency)) / 1000 as bucket_avg_latency,
+	  round(1000 * max(max_latency)) / 1000 as max_latency
         from tests where tests.set='$SET'
 	group by set, scale, clients, rate_limit
 	order by set, scale, clients, rate_limit;
@@ -143,9 +140,8 @@ ff
 	clients,
 	coalesce(rate_limit::text, '(none)') as rate_limit,
 	to_char(round(tps), 'FM9G999G999G999G999') as tps,
-	round(1000 * avg_latency) / 1000 as avg_latency,
-	round(1000 * percentile_90_latency) / 1000 as "90%<",
-	round(1000 * percentile_99_latency) / 1000 as "99%<",
+	round(1000 * avg_latency) / 1000 as bucket_avg_latency,
+	round(1000 * max_latency) / 1000 as max_latency,
 	to_char(checkpoints_timed + checkpoints_req, 'FM9G999G999G999G999') as chkpts,
 	to_char(buffers_checkpoint , 'FM9G999G999G999G999') as buf_check,
 	to_char(buffers_clean , 'FM9G999G999G999G999') as buf_clean,
@@ -257,10 +253,8 @@ if [ "$OSDATA" -eq "1" ]; then
 fi
 
 # Get MAX_TPS and MAX_LATENCY, to make all graphs directly comparable across runs (GnuPlot looks for this)
-export MAX_TPS=`$RESULTPSQL -A -t -c "with tps as(select extract(epoch from date_trunc('second', ts)) as sec, \
-  count(*) as sec_tps from timing group by date_trunc('second', ts)) \
-  select max(sec_tps) * 1.15 from tps;"`
-export MAX_LATENCY=`$RESULTPSQL -A -t -c "select max(latency) from timing"`
+export MAX_TPS=`$RESULTPSQL -A -t -c "select max(num_of_transactions) from timing;"`
+export MAX_LATENCY=`$RESULTPSQL -A -t -c "select max(max_latency)/1000 from timing"`
 
 # Export settings for GnuPlot
 export TPS_WEIGHT=$TPS_WEIGHT
@@ -277,28 +271,27 @@ for TEST in $TESTS ; do
   export MAX_TIME=$(echo $MIN_AND_MAX_TIME | awk -F' ' '{print $2}')
 
   $RESULTPSQL -A -t -F' ' -c "select extract(epoch from date_trunc('second', ts)), \
-  count(*) \
+	  num_of_transactions \
   from timing where test = '$TEST' \
-  group by date_trunc('second', ts) order by date_trunc('second', ts)" > tpsdata.txt
+  order by 1" > tpsdata.txt
   gnuplot $BASEDIR/plots/tps.script
 
-  $RESULTPSQL -A -t -F' ' -c "select extract(epoch from ts), latency from timing where test = '$TEST'" > latency.txt
+  # convert latencies to milliseconds
+  $RESULTPSQL -A -t -F' ' -c "select extract(epoch from ts), latency_sum/1000 from timing where test = '$TEST'" > latency.txt
 
-  # Finally, get 90th and 99th percentile latency environment variables, for
-  # the benefit of the latency graph
-  AVG_90_99=$($RESULTPSQL -A -t -F' ' -c "select avg_latency, percentile_90_latency, percentile_99_latency from tests where test = '$TEST';")
-  export AVG_LAT=$(echo $AVG_90_99 | awk -F' ' '{print $1}')
-  export NIN_PERC=$(echo $AVG_90_99 | awk -F' ' '{print $2}')
-  export NIN_NIN_PERC=$(echo $AVG_90_99 | awk -F' ' '{print $3}')
+  # Finally, get avg and max latency environment variables, for the benefit of
+  # the latency graph.  Convert to milliseconds too.
+  AVG_MAX=$($RESULTPSQL -A -t -F' ' -c "select avg_latency/1000, max_latency/1000 from tests where test = '$TEST';")
+  export AVG_LAT=$(echo $AVG_MAX | awk -F' ' '{print $1}')
+  export MAX_LAT=$(echo $AVG_MAX | awk -F' ' '{print $2}')
 
   gnuplot $BASEDIR/plots/latency.script
 
   rm tpsdata.txt
   rm latency.txt
 
-  $RESULTPSQL -q -c "update tests set avg_latency=(select avg(latency) from timing where tests.test=timing.test), \
-  percentile_90_latency = (select latency from timing where tests.test = timing.test order by latency offset (round(0.90*trans)) limit 1), \
-  percentile_99_latency = (select latency from timing where tests.test = timing.test order by latency offset (round(0.99*trans)) limit 1) \
+  $RESULTPSQL -q -c "update tests set avg_latency=(select avg(latency_sum/nullif(num_of_transactions, 0)) from timing where tests.test=timing.test), \
+	  max_latency = (select max(max_latency) from timing where tests.test = timing.test) \
   where tests.test = '$TEST'"
 
   $RESULTPSQL -t -A -F"," -c "select extract(epoch from taken), \

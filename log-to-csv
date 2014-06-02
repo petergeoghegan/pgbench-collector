@@ -8,11 +8,10 @@ test=sys.argv[1]
 out=csv.writer(sys.stdout, delimiter=',')
 for l in sys.stdin:
   l = l.strip()
-  (client, trans, latency, filenum, sec, usec) = l.split(" ")
-  latency = float(latency) / 1000
-  timestamp = float(sec) + float(usec) / 1000000
+  (interval_start, num_of_transactions, latency_sum, latency_2_sum, min_latency, max_latency) = l.split(" ")
+  timestamp = float(interval_start)
   # Store UTC timestamps, which Postgres is told to expect when subsequently
   # reading the CSV using COPY
   d = datetime.datetime.utcfromtimestamp(timestamp)
-  r = [d.isoformat(" "), filenum, latency, test]
+  r = [d.isoformat(" "), num_of_transactions, latency_sum, latency_2_sum, min_latency, max_latency, test]
   out.writerow(r)

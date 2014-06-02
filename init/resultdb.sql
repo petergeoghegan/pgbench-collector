@@ -25,20 +25,30 @@ CREATE TABLE tests(
   workers int,
   trans int,
   avg_latency float,
-  percentile_90_latency float,
-  percentile_99_latency float,
+  max_latency float,
   wal_written numeric,
   cleanup interval default null,
   rate_limit numeric default null
 );
 
+comment on column tests.avg_latency is 'Average latency for test in milliseconds';
+comment on column tests.max_latency is 'Max latency for test in milliseconds';
+
 DROP TABLE IF EXISTS timing;
 CREATE TABLE timing(
   ts timestamptz,
-  filenum int,
-  latency numeric(9,3),
+  num_of_transactions bigint,
+  latency_sum bigint,
+  latency_2_sum bigint,
+  min_latency bigint,
+  max_latency bigint,
   test int NOT NULL REFERENCES tests(test)
   );
+
+comment on column timing.latency_sum is 'Sum of latencies in interval in original pgbench microseconds';
+comment on column timing.latency_2_sum is 'Sum of 2nd power of latencies in interval in original pgbench microseconds';
+comment on column timing.min_latency is 'Min of latencies in interval in original pgbench microseconds';
+comment on column timing.max_latency is 'Max of latencies in interval in original pgbench microseconds';
 
 CREATE INDEX idx_timing_test on timing(test, ts);
 

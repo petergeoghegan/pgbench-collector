@@ -184,7 +184,7 @@ fi
 
 # Run the main pgbench test
 echo Script $SCRIPT executing for $CLIENTS concurrent users... 1>&2
-$PGBENCHBIN -f $BASEDIR/tests/$SCRIPT -s $SCALE -l -n $TESTLEN -U $TESTUSER -h $TESTHOST -p $TESTPORT -c $CLIENTS $WORKERS $RATEOPT $TESTDB > results.txt &
+$PGBENCHBIN -f $BASEDIR/tests/$SCRIPT -s $SCALE -l --aggregate-interval=1 -n $TESTLEN -U $TESTUSER -h $TESTHOST -p $TESTPORT -c $CLIENTS $WORKERS $RATEOPT $TESTDB > results.txt &
 P=$!
 wait $P
 $RESULTPSQL -q -c "update tests set end_time = now() where test = $TEST"
@@ -241,10 +241,6 @@ fi
 # In the multi-threaded case, there may be a number of files, so copy
 # them all in
 cat pgbench_log.${P}* > pgbench.log
-echo Worst latency results:
-
-# TODO On Solaris, this may need to use /usr/xpg4/bin/tail instead
-cat pgbench.log | cut -f 3 -d " " | sort -n | tail -n 5
 
 tps=`grep "(including connections establishing)" results.txt | cut -d " " -f 3`
 trans=`grep "number of transactions actually processed:" results.txt | cut -d":" -f 2 | cut -d "/" -f 1`
@@ -266,9 +262,8 @@ else
   $RESULTPSQL -c "set timezone to 'utc'; copy timing from stdin with csv" < timing.csv
   # (This may be used within webreport)
 
-  $RESULTPSQL -q -c "update tests set avg_latency=(select avg(latency) from timing where tests.test=timing.test), \
-  percentile_90_latency = (select latency from timing where tests.test = timing.test order by latency offset (round(0.90*trans)) limit 1), \
-  percentile_99_latency = (select latency from timing where tests.test = timing.test order by latency offset (round(0.99*trans)) limit 1) \
+  $RESULTPSQL -q -c "update tests set avg_latency=(select avg(latency_sum/num_of_transactions) / 1000 from timing where tests.test=timing.test), \
+	  max_latency = (select max(max_latency) / 1000 from timing where tests.test = timing.test) \
   where tests.test='$TEST'"
 fi
 

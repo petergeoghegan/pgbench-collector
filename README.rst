@@ -168,16 +168,15 @@ Version compatibility
 =====================
 
 The default configuration now aims to support the pgbench that ships with
-PostgreSQL 8.4 and later versions, which uses names such as "pgbench_accounts"
-for its tables. Earlier versions are unsupported.
+PostgreSQL 9.3 and later versions.  `--aggregate-interval` is required, which
+only became available in 9.3.
 
 Multiple worker support
 -----------------------
 
-Starting in PostgreSQL 9.0, pgbench allows splitting up the work pgbench does
-into multiple worker threads or processes (which depends on whether the
-database client libraries haves been compiled with thread-safe behavior or
-not).
+pgbench allows splitting up the work pgbench does into multiple worker threads
+or processes (which depends on whether the database client libraries haves been
+compiled with thread-safe behavior or not).
 
 This feature is extremely valuable, as it's likely to give at least a 15%
 speedup on common hardware. And it can more than double throughput on
