@@ -4,12 +4,12 @@
 # are using PostgreSQL 8.4 or later, you normally don't need to
 # change any of these.
 
-BASEDIR=`pwd`
-PGBENCHBIN=`which pgbench`
+: ${BASEDIR:=`pwd`}
+: ${PGBENCHBIN:=`which pgbench`}
 
 # SKIPINIT should be set to 1 either when simulating a cold cache, or
 # if you are not using the pgbench tables for your test
-SKIPINIT=0
+: ${SKIPINIT:=0}
 
 # SKIPREPORT should be set to 1 when html report generation at the end of each
 # set run is not required.  You can always directly run ./webreport some time
@@ -19,59 +19,59 @@ SKIPINIT=0
 # each test set run, since this re-generates *all* prior graphs (this is
 # necessary due to the normalization of xrange and yrange that occurs across
 # tests and runs -- each new test set invalidates old graphs).
-SKIPREPORT=0
+: ${SKIPREPORT:=0}
 
 # These indicate dimensions that webreport should generate drill-down, per test
 # graphs for (including momement to moment TPS figures, and dstat
 # instrumentation)
-RESREPX=800
-RESREPY=600
+: ${RESREPX:=800}
+: ${RESREPY:=600}
 
 # TPS interpolated spline weight for per-test TPS breakdown.  It can sometimes
 # be useful to set this as low as 0.1, to better visualize highly noisy TPS
 # graphs.  (Note that this can be tweaked iteratively, by running ./webreport
 # repeatedly)
-TPS_WEIGHT=1.0
+: ${TPS_WEIGHT:=1.0}
 
 # Set TABBED to 0 to use traditional report format (not Javascript for a
 # multi-tabbed display)
-TABBED=1
+: ${TABBED:=1}
 
 # Set OSDATA to 1 to collect OS data using dstat.  There is a tacit assumption
 # that this is set consistently across test sets (i.e. for an entire benchmark)
-OSDATA=1
+: ${OSDATA:=1}
 
 # Controls the frequency at which dstat snapshots operating system
 # instrumentation.  If the overhead of the instrumentation is a concern, it may
 # be useful to increase this.
-DSTAT_DELAY_SECS=10
+: ${DSTAT_DELAY_SECS:=10}
 
 # Test/result database connection
-TESTHOST=localhost
-TESTUSER=`whoami`
-TESTPORT=5432
-TESTDB=pgbench
+: ${TESTHOST:=localhost}
+: ${TESTUSER:=`whoami`}
+: ${TESTPORT:=5432}
+: ${TESTDB:=pgbench}
 
-RESULTHOST="$TESTHOST"
-RESULTUSER="$TESTUSER"
-RESULTPORT="$TESTPORT"
-RESULTDB=results
+: ${RESULTHOST:="$TESTHOST"}
+: ${RESULTUSER:="$TESTUSER"}
+: ${RESULTPORT:="$TESTPORT"}
+: ${RESULTDB:=results}
 
 # Main test run customization
 #
 # Set this to a number only when using pgbench 9.0 or later (it is recommended
 # that a 9.0+ era pgbench be used in order for this to work).  This will set
 # the number of worker threads up to this maximum for each client count
-MAX_WORKERS=`nproc`
+: ${MAX_WORKERS:=`nproc`}
 
-SCRIPT="tpc-b.sql"
-SCALES="10"
-SETCLIENTS="8"
-SETTIMES=1
+: ${SCRIPT:="tpc-b.sql"}
+: ${SCALES:="10"}
+: ${SETCLIENTS:="8"}
+: ${SETTIMES:=1}
 
 # RUNTIME is in seconds.  If it is specified, then TOTTRANS is ignored.
-RUNTIME=45
-TOTTRANS=""
+: ${RUNTIME:=45}
+: ${TOTTRANS:=""}
 
 # A transaction count may be used instead
 #RUNTIME=""
@@ -79,4 +79,4 @@ TOTTRANS=""
 
 # Starting in the 9.4 pgbench, you can limit the maximum rate.  This takes a
 # list like scale and clients
-SETRATES=""
+: ${SETRATES:=""}
