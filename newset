@@ -12,5 +12,4 @@ if [ -z "$SETINFO" ] ; then
   exit 1
 fi
 
-$RESULTPSQL -c "INSERT INTO testset(info, testdb, testuser, testhost, testport) VALUES('$SETINFO', '$TESTDB', '$TESTUSER', '$TESTHOST', '$TESTPORT') RETURNING set as your_set_number"
-$RESULTPSQL -c "SELECT info, testdb, testuser, testhost, testport FROM testset ORDER BY set"
+$RESULTPSQL -tAq -c "INSERT INTO testset(info, testdb, testuser, testhost, testport) VALUES('$SETINFO', '$TESTDB', '$TESTUSER', '$TESTHOST', '$TESTPORT') RETURNING set"
